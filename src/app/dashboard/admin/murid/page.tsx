@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 // Loading Skeleton Component dengan animasi lebih halus
 const SkeletonLoader = ({ count = 6 }: { count?: number }) => (
     <div className="space-y-3">
-        {[...Array(count)].map((_, i) => (
+        {[...Array(count)].map((_: any, i: number) => (
             <div
                 key={i}
                 className="h-12 bg-gradient-to-r from-stone-200 via-stone-100 to-stone-200 rounded-lg relative overflow-hidden"
@@ -182,14 +182,14 @@ export default function AdminMuridPage() {
     }, []);
 
     // Filter kelas based on selected jenjang
-    const filteredKelas = kelasList.filter(k => k.jenjang_id === jenjangId);
-    const filteredEditKelas = kelasList.filter(k => k.jenjang_id === editJenjangId);
+    const filteredKelas = kelasList.filter((k: any) => k.jenjang_id === jenjangId);
+    const filteredEditKelas = kelasList.filter((k: any) => k.jenjang_id === editJenjangId);
 
     // Update kelasId when jenjang changes (for tambah form)
     useEffect(() => {
         if (filteredKelas.length > 0) {
             // Check if current kelasId is valid for the new jenjang
-            const isValidKelas = filteredKelas.some(k => k.id === kelasId);
+            const isValidKelas = filteredKelas.some((k: any) => k.id === kelasId);
             if (!isValidKelas) {
                 setKelasId(filteredKelas[0].id);
             }
@@ -201,7 +201,7 @@ export default function AdminMuridPage() {
     // Update editKelasId when editJenjang changes
     useEffect(() => {
         if (filteredEditKelas.length > 0) {
-            const isValidKelas = filteredEditKelas.some(k => k.id === editKelasId);
+            const isValidKelas = filteredEditKelas.some((k: any) => k.id === editKelasId);
             if (!isValidKelas) {
                 setEditKelasId(filteredEditKelas[0].id);
             }
@@ -651,7 +651,7 @@ export default function AdminMuridPage() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const filtered = muridList.filter(m => {
+    const filtered = muridList.filter((m: any) => {
         const matchJenjang = !filterJenjang || m.jenjang_id === filterJenjang;
         const matchSearch = !search ||
             m.nama.toLowerCase().includes(search.toLowerCase()) ||
@@ -719,7 +719,7 @@ export default function AdminMuridPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             <option value="">Pilih Jenjang</option>
-                            {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                            {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                         </select>
 
                         <select
@@ -730,7 +730,7 @@ export default function AdminMuridPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             {filteredKelas.length > 0 ? (
-                                filteredKelas.map(k => <option key={k.id} value={k.id}>{k.nama}</option>)
+                                filteredKelas.map((k: any) => <option key={k.id} value={k.id}>{k.nama}</option>)
                             ) : (
                                 <option value="">Pilih jenjang terlebih dahulu</option>
                             )}
@@ -773,7 +773,7 @@ export default function AdminMuridPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             <option value="">Pilih Orang Tua (opsional)</option>
-                            {orangtuaList.map(o => <option key={o.id} value={o.id}>{o.full_name} ({o.email})</option>)}
+                            {orangtuaList.map((o: any) => <option key={o.id} value={o.id}>{o.full_name} ({o.email})</option>)}
                         </select>
 
                         <div className="md:col-span-2 flex gap-3">
@@ -833,7 +833,7 @@ export default function AdminMuridPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             <option value="">Pilih Jenjang</option>
-                            {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                            {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                         </select>
 
                         <select
@@ -844,7 +844,7 @@ export default function AdminMuridPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             {filteredEditKelas.length > 0 ? (
-                                filteredEditKelas.map(k => <option key={k.id} value={k.id}>{k.nama}</option>)
+                                filteredEditKelas.map((k: any) => <option key={k.id} value={k.id}>{k.nama}</option>)
                             ) : (
                                 <option value="">Pilih jenjang terlebih dahulu</option>
                             )}
@@ -887,7 +887,7 @@ export default function AdminMuridPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             <option value="">Pilih Orang Tua (opsional)</option>
-                            {orangtuaList.map(o => <option key={o.id} value={o.id}>{o.full_name} ({o.email})</option>)}
+                            {orangtuaList.map((o: any) => <option key={o.id} value={o.id}>{o.full_name} ({o.email})</option>)}
                         </select>
 
                         <div className="md:col-span-2 flex gap-3">
@@ -1034,7 +1034,7 @@ export default function AdminMuridPage() {
                     className="bg-white border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-[180px] transition-all"
                 >
                     <option value="">Semua Jenjang</option>
-                    {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                    {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                 </select>
             </div>
 
@@ -1057,9 +1057,9 @@ export default function AdminMuridPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-200">
-                                {[...Array(6)].map((_, i) => (
+                                {[...Array(6)].map((_: any, i: number) => (
                                     <tr key={i} className="hover:bg-stone-50 transition-colors">
-                                        {[...Array(9)].map((_, j) => (
+                                        {[...Array(9)].map((_: any, j: number) => (
                                             <td key={j} className="px-6 py-4">
                                                 <div className="h-4 bg-gradient-to-r from-stone-200 via-stone-100 to-stone-200 rounded relative overflow-hidden">
                                                     <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -1090,7 +1090,7 @@ export default function AdminMuridPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-200">
-                                {filtered.map((murid, index) => {
+                                {filtered.map((murid: any, index: number) => {
                                     const age = calculateAge(murid.tanggal_lahir);
                                     return (
                                         <tr key={murid.id} className="hover:bg-stone-50 transition-all duration-200 animate-in fade-in" style={{ animationDelay: `${index * 50}ms` }}>

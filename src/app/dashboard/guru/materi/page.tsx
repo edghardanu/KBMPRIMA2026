@@ -48,7 +48,7 @@ export default function GuruMateriPage() {
         setCheckedPages(prev => {
             const current = prev[muridId] || [];
             if (current.includes(page)) {
-                return { ...prev, [muridId]: current.filter(p => p !== page).sort((a, b) => a - b) };
+                return { ...prev, [muridId]: current.filter((p: number) => p !== page).sort((a, b) => a - b) };
             } else {
                 return { ...prev, [muridId]: [...current, page].sort((a, b) => a - b) };
             }
@@ -90,7 +90,7 @@ export default function GuruMateriPage() {
             setMateriList(data || []);
             if (data?.length) setSelectedMateri(data[0].id);
 
-            const filteredKelas = allKelasList.filter(k => k.jenjang_id === selectedJenjang && k.guru_id === profile?.id);
+            const filteredKelas = allKelasList.filter((k: any) => k.jenjang_id === selectedJenjang && k.guru_id === profile?.id);
             setKelasList(filteredKelas);
             if (filteredKelas.length > 0) {
                 setSelectedKelas(filteredKelas[0].id);
@@ -119,7 +119,7 @@ export default function GuruMateriPage() {
     const handleSubmit = async () => {
         if (!selectedMateri) return;
         setSubmitting(true);
-        const records = muridList.map(m => {
+        const records = muridList.map((m: any) => {
             const h = checkedPages[m.id] || [];
             const halString = h.length > 0 ? `Hal: ${h.join(', ')}` : '';
             const c = catatan[m.id] || '';
@@ -151,7 +151,7 @@ export default function GuruMateriPage() {
         }
 
         // Send WhatsApp Notifications
-        const materiName = materiList.find(m => m.id === selectedMateri)?.nama || 'Materi';
+        const materiName = materiList.find((m: any) => m.id === selectedMateri)?.nama || 'Materi';
 
         for (const m of muridList) {
             if (m.whatsapp_ortu) {
@@ -176,7 +176,7 @@ export default function GuruMateriPage() {
     };
 
     const filteredMuridList = useMemo(() => {
-        return muridList.filter(m =>
+        return muridList.filter((m: any) =>
             m.nama.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [muridList, searchTerm]);
@@ -215,7 +215,7 @@ export default function GuruMateriPage() {
                         onChange={(e) => setSelectedJenjang(e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     >
-                        {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                     </select>
                 </div>
 
@@ -226,7 +226,7 @@ export default function GuruMateriPage() {
                         onChange={(e) => setSelectedKelas(e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     >
-                        {kelasList.map(k => <option key={k.id} value={k.id}>{k.nama}</option>)}
+                        {kelasList.map((k: any) => <option key={k.id} value={k.id}>{k.nama}</option>)}
                         {kelasList.length === 0 && <option value="">Tidak ada kelas</option>}
                     </select>
                 </div>
@@ -238,7 +238,7 @@ export default function GuruMateriPage() {
                         onChange={(e) => setSelectedMateri(e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     >
-                        {materiList.map(m => <option key={m.id} value={m.id}>{m.nama}</option>)}
+                        {materiList.map((m: any) => <option key={m.id} value={m.id}>{m.nama}</option>)}
                         {materiList.length === 0 && <option value="">Tidak ada materi</option>}
                     </select>
                 </div>
@@ -284,7 +284,7 @@ export default function GuruMateriPage() {
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 animate-pulse space-y-6">
                     <div className="h-6 bg-stone-200 rounded w-1/4"></div>
                     <div className="space-y-4">
-                        {[1, 2, 3, 4].map(i => (
+                        {[1, 2, 3, 4].map((i: number) => (
                             <div key={i} className="flex gap-4 items-center p-4 border border-stone-100 rounded-xl">
                                 <div className="h-8 w-8 bg-stone-200 rounded-full"></div>
                                 <div className="flex-1 space-y-2">
@@ -303,7 +303,7 @@ export default function GuruMateriPage() {
                 <div className="space-y-4">
                     {/* Mobile Card View - For small screens */}
                     <div className="block lg:hidden space-y-4">
-                        {filteredMuridList.map((m, i) => (
+                        {filteredMuridList.map((m: any, i: number) => (
                             <div key={m.id} className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
                                 {/* Header - Click to expand */}
                                 <div
@@ -367,7 +367,7 @@ export default function GuruMateriPage() {
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-8 gap-2 max-h-40 overflow-y-auto p-2 bg-stone-50 rounded-xl">
-                                                {Array.from({ length: maxPage }, (_, idx) => idx + 1).map(halaman => {
+                                                {Array.from({ length: maxPage }, (_, idx) => idx + 1).map((halaman: number) => {
                                                     return (
                                                         <button
                                                             key={halaman}
@@ -433,7 +433,7 @@ export default function GuruMateriPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-stone-100">
-                                    {filteredMuridList.map((m, i) => (
+                                    {filteredMuridList.map((m: any, i: number) => (
                                         <tr key={m.id} className="hover:bg-emerald-50/30 transition-colors">
                                             <td className="px-6 py-4 text-sm text-stone-600">{i + 1}</td>
                                             <td className="px-6 py-4">
@@ -466,7 +466,7 @@ export default function GuruMateriPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap gap-2 max-w-[400px]">
-                                                    {Array.from({ length: maxPage }, (_, idx) => idx + 1).map(halaman => {
+                                                    {Array.from({ length: maxPage }, (_, idx) => idx + 1).map((halaman: number) => {
                                                         return (
                                                             <button
                                                                 key={halaman}

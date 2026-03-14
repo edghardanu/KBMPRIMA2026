@@ -85,11 +85,11 @@ export default function AdminAbsensiPage() {
                         value={selectedJenjang}
                         onChange={(e) => {
                             setSelectedJenjang(e.target.value);
-                            setSelectedJenjangName(jenjangList.find(j => j.id === e.target.value)?.nama || '');
+                            setSelectedJenjangName(jenjangList.find((j: any) => j.id === e.target.value)?.nama || '');
                         }}
                         className="bg-white shadow-sm border border-stone-300 border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     >
-                        {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                     </select>
                     <button
                         onClick={() => exportAbsensiToPDF(selectedJenjangName, recap)}

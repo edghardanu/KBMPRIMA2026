@@ -34,8 +34,8 @@ export default function PengurusAbsensiPage() {
             if (!muridData?.length) { setRecap([]); setLoading(false); return; }
             const { data: absensiData } = await supabase.from('absensi').select('murid_id, status').eq('jenjang_id', selectedJenjang);
             const recapMap: Record<string, AbsensiRecap> = {};
-            muridData.forEach(m => { recapMap[m.id] = { murid_id: m.id, nama: m.nama, hadir: 0, tidak_hadir: 0, izin: 0, sakit: 0, total: 0 }; });
-            absensiData?.forEach(a => { if (recapMap[a.murid_id]) { recapMap[a.murid_id][a.status as 'hadir' | 'tidak_hadir' | 'izin' | 'sakit']++; recapMap[a.murid_id].total++; } });
+            muridData.forEach((m: any) => { recapMap[m.id] = { murid_id: m.id, nama: m.nama, hadir: 0, tidak_hadir: 0, izin: 0, sakit: 0, total: 0 }; });
+            absensiData?.forEach((a: any) => { if (recapMap[a.murid_id]) { recapMap[a.murid_id][a.status as 'hadir' | 'tidak_hadir' | 'izin' | 'sakit']++; recapMap[a.murid_id].total++; } });
             setRecap(Object.values(recapMap));
             setLoading(false);
         };
@@ -47,8 +47,8 @@ export default function PengurusAbsensiPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div><h2 className="text-2xl font-bold text-stone-900">Rekap Absensi</h2><p className="text-stone-700 text-sm">Lihat rekapan absensi murid per jenjang</p></div>
                 <div className="flex gap-3">
-                    <select value={selectedJenjang} onChange={(e) => { setSelectedJenjang(e.target.value); setSelectedJenjangName(jenjangList.find(j => j.id === e.target.value)?.nama || ''); }} className="bg-white shadow-sm border border-stone-300 border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                        {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                    <select value={selectedJenjang} onChange={(e) => { setSelectedJenjang(e.target.value); setSelectedJenjangName(jenjangList.find((j: any) => j.id === e.target.value)?.nama || ''); }} className="bg-white shadow-sm border border-stone-300 border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                     </select>
                     <button onClick={() => exportAbsensiToPDF(selectedJenjangName, recap)} disabled={recap.length === 0} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl text-sm font-medium disabled:opacity-50"><FileDown className="w-4 h-4" /> Export PDF</button>
                 </div>

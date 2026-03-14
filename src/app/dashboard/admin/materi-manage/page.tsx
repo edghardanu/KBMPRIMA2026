@@ -96,7 +96,7 @@ export default function AdminMateriManagePage() {
         }
     };
 
-    const filtered = filterJenjang ? materiList.filter(m => m.jenjang_id === filterJenjang) : materiList;
+    const filtered = filterJenjang ? materiList.filter((m: any) => m.jenjang_id === filterJenjang) : materiList;
 
     return (
         <div className="space-y-6">
@@ -108,7 +108,7 @@ export default function AdminMateriManagePage() {
                 <div className="flex gap-3">
                     <select value={filterJenjang} onChange={(e) => setFilterJenjang(e.target.value)} className="bg-white shadow-sm border border-stone-300 border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="">Semua Jenjang</option>
-                        {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                     </select>
                     <button onClick={() => { handleCancel(); setShowForm(true); }} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-sm font-medium hover:from-emerald-500 hover:to-teal-500 transition-all shadow-lg shadow-emerald-500/25">
                         <Plus className="w-4 h-4" /> Tambah Materi
@@ -128,7 +128,7 @@ export default function AdminMateriManagePage() {
                         <input type="text" value={nama} onChange={(e) => setNama(e.target.value)} placeholder="Nama Materi" required className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                         <input type="text" value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} placeholder="Deskripsi" className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                         <select value={jenjangId} onChange={(e) => setJenjangId(e.target.value)} required className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                            {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                            {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                         </select>
                         <div className="md:col-span-3 flex gap-3">
                             <button type="submit" disabled={submitting} className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-sm font-medium disabled:opacity-50">
@@ -155,7 +155,7 @@ export default function AdminMateriManagePage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-300">
-                                {filtered.map((m) => (
+                                {filtered.map((m: any) => (
                                     <tr key={m.id} className="hover:bg-[#f8f9f5]">
                                         <td className="px-6 py-4 text-sm text-stone-900 font-medium">{m.nama}</td>
                                         <td className="px-6 py-4 text-sm text-stone-700">{m.deskripsi || '-'}</td>

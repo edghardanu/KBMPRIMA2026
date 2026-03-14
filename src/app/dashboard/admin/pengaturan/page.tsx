@@ -92,7 +92,7 @@ export default function AdminPengaturanPage() {
                 .select('key, value');
 
             if (data) {
-                setSettings(prev => prev.map(s => {
+                setSettings(prev => prev.map((s: any) => {
                     const found = data.find((d: any) => d.key === s.key);
                     return found ? { ...s, value: found.value } : s;
                 }));
@@ -122,7 +122,7 @@ export default function AdminPengaturanPage() {
     }, []);
 
     const updateSettingValue = (key: string, value: string) => {
-        setSettings(prev => prev.map(s =>
+        setSettings(prev => prev.map((s: any) =>
             s.key === key ? { ...s, value } : s
         ));
     };
@@ -193,7 +193,7 @@ export default function AdminPengaturanPage() {
     const toggleDay = (dayValue: number) => {
         setScheduleDays(prev =>
             prev.includes(dayValue)
-                ? prev.filter(d => d !== dayValue)
+                ? prev.filter((d: number) => d !== dayValue)
                 : [...prev, dayValue]
         );
     };
@@ -201,7 +201,7 @@ export default function AdminPengaturanPage() {
     // Get label hari aktif
     const getActiveHariLabel = () => {
         const sorted = scheduleDays.sort((a, b) => a - b);
-        return sorted.map(d => HARI_OPTIONS.find(h => h.value === d)?.short).filter(Boolean).join(', ');
+        return sorted.map((d: number) => HARI_OPTIONS.find((h: any) => h.value === d)?.short).filter(Boolean).join(', ');
     };
 
     // Copy cron URL
@@ -220,7 +220,7 @@ export default function AdminPengaturanPage() {
             return;
         }
 
-        const apiKey = settings.find(s => s.key === 'fonnte_api_key')?.value;
+        const apiKey = settings.find((s: any) => s.key === 'fonnte_api_key')?.value;
         if (!apiKey) {
             Swal.fire('Error', 'API Key Fonnte belum dikonfigurasi. Silakan simpan pengaturan terlebih dahulu.', 'error');
             return;
@@ -401,7 +401,7 @@ export default function AdminPengaturanPage() {
                         </h3>
 
                         <div className="space-y-5">
-                            {settings.map(setting => (
+                            {settings.map((setting: any) => (
                                 <div key={setting.key} className="space-y-1.5">
                                     <label className="flex items-center gap-2 text-sm font-bold text-stone-800">
                                         {setting.icon}
@@ -566,7 +566,7 @@ export default function AdminPengaturanPage() {
                                     Hari Aktif Pengiriman
                                 </label>
                                 <div className="flex flex-wrap gap-2">
-                                    {HARI_OPTIONS.map(hari => {
+                                    {HARI_OPTIONS.map((hari: any) => {
                                         const isActive = scheduleDays.includes(hari.value);
                                         return (
                                             <button
@@ -721,7 +721,7 @@ export default function AdminPengaturanPage() {
                             <p className="text-sm text-stone-400">Riwayat pengiriman laporan harian akan muncul di sini.</p>
                         </div>
                     ) : (
-                        reportLogs.map((log, idx) => (
+                        reportLogs.map((log: any, idx: number) => (
                             <div key={idx} className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-emerald-200 transition-colors">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                                     <div className="flex items-center gap-3">
@@ -753,7 +753,7 @@ export default function AdminPengaturanPage() {
                                 {log.details && log.details.length > 0 && (
                                     <div className="mt-3 pt-3 border-t border-stone-100">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                            {log.details.slice(0, 9).map((detail, dIdx) => (
+                                            {log.details.slice(0, 9).map((detail: any, dIdx: number) => (
                                                 <div key={dIdx} className="flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg text-xs">
                                                     {detail.status === 'sent' ? (
                                                         <CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" />

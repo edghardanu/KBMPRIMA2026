@@ -197,7 +197,7 @@ export default function AdminUsersPage() {
             if (error) throw error;
 
             setUsers((prev) =>
-                prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+                prev.map((u: any) => (u.id === userId ? { ...u, role: newRole } : u))
             );
             showToast('Role berhasil diperbarui', 'success');
         } catch (error) {
@@ -222,7 +222,7 @@ export default function AdminUsersPage() {
             if (error) throw error;
 
             setUsers((prev) =>
-                prev.map((u) =>
+                prev.map((u: any) =>
                     u.id === userId
                         ? { ...u, full_name: data.full_name, email: data.email }
                         : u
@@ -253,7 +253,7 @@ export default function AdminUsersPage() {
                 throw new Error("Penghapusan diblokir oleh RLS (Row Level Security) atau karena user ini menjadi referensi di tabel lain. Anda perlu mengatur izin Policy di database Supabase.");
             }
 
-            setUsers((prev) => prev.filter((u) => u.id !== userId));
+            setUsers((prev: any[]) => prev.filter((u: any) => u.id !== userId));
             showToast('Pengguna berhasil dihapus', 'success');
             setShowDeleteConfirm(null);
         } catch (error: any) {
@@ -365,13 +365,13 @@ export default function AdminUsersPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-50">
-                                {users.map((user) => (
+                                {users.map((user: any) => (
                                     <tr key={user.id} className="hover:bg-stone-50 transition-colors">
                                         <td className="px-6 py-4 text-sm text-stone-900 font-medium">{user.full_name || '-'}</td>
                                         <td className="px-6 py-4 text-sm text-stone-600">{user.email}</td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium ${ROLES.find(r => r.value === user.role)?.color}`}>
-                                                {ROLES.find(r => r.value === user.role)?.label}
+                                            <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium ${ROLES.find((r: any) => r.value === user.role)?.color}`}>
+                                                {ROLES.find((r: any) => r.value === user.role)?.label}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-stone-600">
@@ -388,7 +388,7 @@ export default function AdminUsersPage() {
                                                         onChange={(e) => updateRole(user.id, e.target.value as Role)}
                                                         className="bg-white border border-stone-200 rounded-lg text-stone-900 text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                                     >
-                                                        {ROLES.map((r) => (
+                                                        {ROLES.map((r: any) => (
                                                             <option key={r.value} value={r.value}>{r.label}</option>
                                                         ))}
                                                     </select>

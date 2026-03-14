@@ -104,10 +104,10 @@ export default function AdminMateriPage() {
     // Filter recap based on selected murid
     useEffect(() => {
         if (filterMurid) {
-            const filtered = recap.filter(item => item.murid_id === filterMurid);
+            const filtered = recap.filter((item: any) => item.murid_id === filterMurid);
             setFilteredRecap(filtered);
 
-            const murid = muridOptions.find(m => m.id === filterMurid);
+            const murid = muridOptions.find((m: any) => m.id === filterMurid);
             setSelectedMuridName(murid?.nama || '');
         } else {
             setFilteredRecap(recap);
@@ -117,7 +117,7 @@ export default function AdminMateriPage() {
 
     // Filter murid options based on search term
     const filteredMuridOptions = useMemo(() => {
-        return muridOptions.filter(murid =>
+        return muridOptions.filter((murid: any) =>
             murid.nama.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [muridOptions, searchTerm]);
@@ -287,7 +287,7 @@ export default function AdminMateriPage() {
 
             const getGeneralAttendanceRate = () => {
                 let total = 0, hadir = 0;
-                absensiStat.forEach(stat => {
+                absensiStat.forEach((stat: any) => {
                     total += stat.total;
                     hadir += stat.hadir;
                 });
@@ -444,7 +444,7 @@ export default function AdminMateriPage() {
                 <div className="flex flex-wrap gap-3">
                     <select value={filterTahun} onChange={(e) => setFilterTahun(e.target.value)} className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="">Semua Tahun</option>
-                        {generateTahunOptions().map(t => <option key={t} value={t}>{t}</option>)}
+                        {generateTahunOptions().map((t: string) => <option key={t} value={t}>{t}</option>)}
                     </select>
 
                     <select value={filterSemester} onChange={(e) => { setFilterSemester(e.target.value); if (e.target.value) setFilterBulan(''); }} className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
@@ -455,11 +455,11 @@ export default function AdminMateriPage() {
 
                     <select value={filterBulan} onChange={(e) => { setFilterBulan(e.target.value); if (e.target.value) setFilterSemester(''); }} disabled={!!filterSemester} className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50">
                         <option value="">Semua Bulan</option>
-                        {BULAN_OPTIONS.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
+                        {BULAN_OPTIONS.map((b: any) => <option key={b.value} value={b.value}>{b.label}</option>)}
                     </select>
 
-                    <select value={selectedJenjang} onChange={(e) => { setSelectedJenjang(e.target.value); setSelectedJenjangName(jenjangList.find(j => j.id === e.target.value)?.nama || ''); }} className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                        {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                    <select value={selectedJenjang} onChange={(e) => { setSelectedJenjang(e.target.value); setSelectedJenjangName(jenjangList.find((j: any) => j.id === e.target.value)?.nama || ''); }} className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                     </select>
 
                     {/* Filter Murid Dropdown dengan Search */}
@@ -471,7 +471,7 @@ export default function AdminMateriPage() {
                                 className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-[200px] appearance-none"
                             >
                                 <option value="">Semua Murid</option>
-                                {filteredMuridOptions.map(m => (
+                                {filteredMuridOptions.map((m: any) => (
                                     <option key={m.id} value={m.id}>{m.nama}</option>
                                 ))}
                             </select>
@@ -538,7 +538,7 @@ export default function AdminMateriPage() {
 
                     {filterBulan && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm border border-amber-200">
-                            Bulan: {BULAN_OPTIONS.find(b => b.value === filterBulan)?.label}
+                            Bulan: {BULAN_OPTIONS.find((b: any) => b.value === filterBulan)?.label}
                             <button onClick={() => setFilterBulan('')} className="hover:text-amber-900">
                                 <X className="w-3 h-3" />
                             </button>
@@ -644,7 +644,7 @@ export default function AdminMateriPage() {
             {loading ? (
                 <div className="space-y-6 animate-pulse">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {[1, 2, 3].map(i => (
+                        {[1, 2, 3].map((i: number) => (
                             <div key={i} className="bg-white border border-stone-200 shadow-sm rounded-xl p-5 flex flex-col gap-2">
                                 <div className="h-6 bg-stone-200 rounded w-1/2"></div>
                                 <div className="h-4 bg-stone-200 rounded w-3/4"></div>
@@ -654,7 +654,7 @@ export default function AdminMateriPage() {
                     </div>
                     <div className="bg-white shadow-sm border border-stone-200 rounded-2xl p-6">
                         <div className="space-y-4">
-                            {[1, 2, 3, 4].map(i => (
+                            {[1, 2, 3, 4].map((i: number) => (
                                 <div key={i} className="flex gap-4 items-center border-b border-stone-100 pb-4">
                                     <div className="h-6 bg-stone-200 rounded w-16"></div>
                                     <div className="h-6 bg-stone-200 rounded w-1/4"></div>
@@ -669,7 +669,7 @@ export default function AdminMateriPage() {
                     {/* Ringkasan Capaian per Materi per Periode dengan indikator 100% */}
                     {materiSummary.length > 0 && !filterMurid && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {materiSummary.map((summary, idx) => (
+                            {materiSummary.map((summary: any, idx: number) => (
                                 <div key={idx} className={`bg-white border ${summary.isTercapai ? 'border-emerald-400 shadow-lg shadow-emerald-100' : 'border-stone-200 shadow-sm'} rounded-xl p-5 flex flex-col gap-2 transition-all duration-300 hover:shadow-md`}>
                                     <div className="flex justify-between items-start">
                                         <h3 className="font-semibold text-stone-900 flex items-center gap-2">

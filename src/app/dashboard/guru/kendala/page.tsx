@@ -69,14 +69,14 @@ export default function GuruKendalaPage() {
                         <div>
                             <label className="block text-sm text-stone-700 mb-1">Jenjang</label>
                             <select value={selectedJenjang} onChange={(e) => setSelectedJenjang(e.target.value)} className="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                                {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                                {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                             </select>
                         </div>
                         <div>
                             <label className="block text-sm text-stone-700 mb-1">Kelas (opsional)</label>
                             <select value={selectedKelas} onChange={(e) => setSelectedKelas(e.target.value)} className="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                                 <option value="">Semua Kelas</option>
-                                {kelasList.map(k => <option key={k.id} value={k.id}>{k.nama}</option>)}
+                                {kelasList.map((k: any) => <option key={k.id} value={k.id}>{k.nama}</option>)}
                             </select>
                         </div>
                     </div>
@@ -98,7 +98,7 @@ export default function GuruKendalaPage() {
             <div>
                 <h3 className="text-lg font-semibold text-stone-900 mb-4">Riwayat Kendala Saya</h3>
                 <div className="space-y-3">
-                    {kendalaList.map(k => (
+                    {kendalaList.map((k: any) => (
                         <div key={k.id} className="bg-white shadow-sm border border-stone-300 border border-stone-300 rounded-xl p-4">
                             <div className="flex items-start justify-between">
                                 <div><h4 className="text-stone-900 font-medium">{k.judul}</h4><p className="text-sm text-stone-700 mt-1">{k.deskripsi}</p><p className="text-xs text-stone-700 mt-2">{k.jenjang?.nama} • {new Date(k.created_at).toLocaleDateString('id-ID')}</p></div>

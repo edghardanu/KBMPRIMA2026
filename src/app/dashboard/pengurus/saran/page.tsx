@@ -61,11 +61,11 @@ export default function PengurusSaranPage() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div><h2 className="text-2xl font-bold text-stone-900">Saran Guru</h2><p className="text-stone-700 text-sm">Setujui atau tolak saran dari guru</p></div>
-                <button onClick={() => exportSaranToPDF(saranList.map(s => ({ judul: s.judul, deskripsi: s.deskripsi, jenjang: s.jenjang?.nama || '-', status: s.status, tanggal: new Date(s.created_at).toLocaleDateString('id-ID') })))} disabled={saranList.length === 0} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl text-sm font-medium disabled:opacity-50"><FileDown className="w-4 h-4" /> Export PDF</button>
+                <button onClick={() => exportSaranToPDF(saranList.map((s: any) => ({ judul: s.judul, deskripsi: s.deskripsi, jenjang: s.jenjang?.nama || '-', status: s.status, tanggal: new Date(s.created_at).toLocaleDateString('id-ID') })))} disabled={saranList.length === 0} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl text-sm font-medium disabled:opacity-50"><FileDown className="w-4 h-4" /> Export PDF</button>
             </div>
             {loading ? (<div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div></div>) : (
                 <div className="space-y-4">
-                    {saranList.map((s) => (
+                    {saranList.map((s: any) => (
                         <div key={s.id} className="bg-white shadow-sm border border-stone-300 backdrop-blur-xl border border-stone-300 rounded-2xl p-5 hover:border-stone-300 transition-all">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">

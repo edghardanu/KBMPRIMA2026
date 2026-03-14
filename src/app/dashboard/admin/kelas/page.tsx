@@ -91,7 +91,7 @@ export default function AdminKelasPage() {
     };
 
     const filtered = filterJenjang
-        ? kelasList.filter(k => k.jenjang_id === filterJenjang)
+        ? kelasList.filter((k: any) => k.jenjang_id === filterJenjang)
         : kelasList;
 
     return (
@@ -108,7 +108,7 @@ export default function AdminKelasPage() {
                         className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     >
                         <option value="">Semua Jenjang</option>
-                        {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                     </select>
                     <button
                         onClick={() => {
@@ -150,7 +150,7 @@ export default function AdminKelasPage() {
                             required
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         >
-                            {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                            {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                         </select>
                         <select
                             value={guruId}
@@ -158,7 +158,7 @@ export default function AdminKelasPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         >
                             <option value="">Tanpa Guru</option>
-                            {guruList.map(g => <option key={g.id} value={g.id}>{g.full_name}</option>)}
+                            {guruList.map((g: any) => <option key={g.id} value={g.id}>{g.full_name}</option>)}
                         </select>
                         <div className="md:col-span-3 flex gap-3">
                             <button
@@ -185,7 +185,7 @@ export default function AdminKelasPage() {
                 <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div></div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filtered.map((kelas) => (
+                    {filtered.map((kelas: any) => (
                         <div key={kelas.id} className="bg-white shadow-sm border border-stone-300 rounded-2xl p-5 hover:border-emerald-200 transition-all group">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white">

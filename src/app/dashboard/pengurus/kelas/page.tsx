@@ -17,7 +17,7 @@ export default function PengurusKelasPage() {
             const { data: kelas } = await supabase.from('kelas').select('jenjang_id');
             setJenjangList(jenjang || []);
             const counts: Record<string, number> = {};
-            kelas?.forEach(k => { counts[k.jenjang_id] = (counts[k.jenjang_id] || 0) + 1; });
+            kelas?.forEach((k: any) => { counts[k.jenjang_id] = (counts[k.jenjang_id] || 0) + 1; });
             setKelasCounts(counts);
             setLoading(false);
         };

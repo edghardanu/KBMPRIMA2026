@@ -68,27 +68,27 @@ export default function GuruProposalPage() {
 
     // Jadwal helpers
     const updateJadwal = (index: number, field: keyof ProposalJadwal, value: string) => {
-        setJadwal(prev => {
+        setJadwal((prev: any[]) => {
             const updated = [...prev];
             updated[index] = { ...updated[index], [field]: value };
             return updated;
         });
     };
-    const addJadwalRow = () => setJadwal(prev => [...prev, { ...emptyJadwal }]);
-    const removeJadwalRow = (index: number) => setJadwal(prev => prev.filter((_, i) => i !== index));
+    const addJadwalRow = () => setJadwal((prev: any[]) => [...prev, { ...emptyJadwal }]);
+    const removeJadwalRow = (index: number) => setJadwal((prev: any[]) => prev.filter((_, i) => i !== index));
 
     // Anggaran helpers
     const updateAnggaran = (index: number, field: keyof ProposalAnggaran, value: any) => {
-        setAnggaran(prev => {
+        setAnggaran((prev: any[]) => {
             const updated = [...prev];
             updated[index] = { ...updated[index], [field]: value };
             updated[index].total = updated[index].jumlah * updated[index].harga_satuan;
             return updated;
         });
     };
-    const addAnggaranRow = () => setAnggaran(prev => [...prev, { ...emptyAnggaran }]);
-    const removeAnggaranRow = (index: number) => setAnggaran(prev => prev.filter((_, i) => i !== index));
-    const totalAnggaran = anggaran.reduce((sum, a) => sum + (a.jumlah * a.harga_satuan), 0);
+    const addAnggaranRow = () => setAnggaran((prev: any[]) => [...prev, { ...emptyAnggaran }]);
+    const removeAnggaranRow = (index: number) => setAnggaran((prev: any[]) => prev.filter((_, i) => i !== index));
+    const totalAnggaran = anggaran.reduce((sum: number, a: any) => sum + (a.jumlah * a.harga_satuan), 0);
 
     const formatRupiah = (num: number) => 'Rp ' + num.toLocaleString('id-ID');
 
@@ -104,9 +104,9 @@ export default function GuruProposalPage() {
             const payload = {
                 judul, jenjang_id: jenjangId, tanggal_kegiatan: tanggalKegiatan,
                 tempat, pendahuluan,
-                jadwal: jadwal.filter(j => j.nama_kegiatan.trim()),
+                jadwal: jadwal.filter((j: any) => j.nama_kegiatan.trim()),
                 tujuan, manfaat,
-                anggaran: anggaran.filter(a => a.item.trim()),
+                anggaran: anggaran.filter((a: any) => a.item.trim()),
                 total_anggaran: totalAnggaran, penutup,
                 status: submitToReview ? 'submitted' : 'draft',
                 created_by: profile?.id,
@@ -143,9 +143,9 @@ export default function GuruProposalPage() {
 
             // Update local state instead of refetching all
             if (editId) {
-                setProposals(prev => prev.map(p => p.id === editId ? updatedProposal : p));
+                setProposals((prev: any[]) => prev.map((p: any) => p.id === editId ? updatedProposal : p));
             } else {
-                setProposals(prev => [updatedProposal, ...prev]);
+                setProposals((prev: any[]) => [updatedProposal, ...prev]);
             }
             
             handleCancel();
@@ -175,7 +175,7 @@ export default function GuruProposalPage() {
         if (!confirm.isConfirmed) return;
 
         await supabase.from('proposal_kegiatan').delete().eq('id', id);
-        setProposals(prev => prev.filter(p => p.id !== id));
+        setProposals((prev: any[]) => prev.filter((p: any) => p.id !== id));
         Swal.fire({ icon: 'success', title: 'Dihapus!', timer: 1200, showConfirmButton: false });
     };
 
@@ -244,14 +244,14 @@ export default function GuruProposalPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="md:col-span-2 space-y-1.5">
                                 <label className="text-sm font-bold text-stone-800">Judul Kegiatan *</label>
-                                <input value={judul} onChange={e => setJudul(e.target.value)} placeholder="Contoh: Workshop Persiapan Pernikahan Islami"
+                                <input value={judul} onChange={(e: any) => setJudul(e.target.value)} placeholder="Contoh: Workshop Persiapan Pernikahan Islami"
                                     className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-bold text-stone-800">Jenjang *</label>
                                 <select value={jenjangId} onChange={e => setJenjangId(e.target.value)}
                                     className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                                    {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                                    {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                                 </select>
                             </div>
                         </div>
@@ -408,7 +408,7 @@ export default function GuruProposalPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {proposals.map(p => (
+                    {proposals.map((p: any) => (
                         <div key={p.id} className="bg-white border border-stone-200 rounded-2xl overflow-hidden hover:border-emerald-200 transition-colors">
                             {/* Header row */}
                             <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

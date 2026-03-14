@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { createClient } from '@/lib/supabase';
 import { exportLaporanAdminToPDF } from '@/lib/pdf-export';
@@ -111,7 +111,7 @@ const BAR_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b
 
 // Status badge component
 const StatusBadge = ({ status }: { status: string }) => {
-    const statusConfig: Record<string, { color: string; icon: JSX.Element; label: string }> = {
+    const statusConfig: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
         pending: {
             color: 'bg-yellow-100 text-yellow-700 border-yellow-200',
             icon: <Clock className="w-3 h-3" />,
@@ -221,24 +221,24 @@ export default function DashboardPage() {
                 .from('jenjang')
                 .select('id, nama');
 
-            const jenjangMap = new Map();
-            jenjangData?.forEach(j => jenjangMap.set(j.id, j.nama));
+            const jenjangMap = new Map<string, string>();
+            jenjangData?.forEach((j: any) => jenjangMap.set(j.id, j.nama));
 
             const { data: kelasData } = await supabase
                 .from('kelas')
                 .select('id, nama');
 
-            const kelasMap = new Map();
-            kelasData?.forEach(k => kelasMap.set(k.id, k.nama));
+            const kelasMap = new Map<string, string>();
+            kelasData?.forEach((k: any) => kelasMap.set(k.id, k.nama));
 
             const { data: profilesData } = await supabase
                 .from('profiles')
                 .select('id, full_name');
 
-            const profilesMap = new Map();
-            profilesData?.forEach(p => profilesMap.set(p.id, p.full_name));
+            const profilesMap = new Map<string, string>();
+            profilesData?.forEach((p: any) => profilesMap.set(p.id, p.full_name));
 
-            const kendalaWithRelations = kendalaData.map(k => ({
+            const kendalaWithRelations = kendalaData.map((k: any) => ({
                 ...k,
                 jenjang_nama: jenjangMap.get(k.jenjang_id) || 'Unknown',
                 kelas_nama: kelasMap.get(k.kelas_id) || 'Unknown',
@@ -270,24 +270,24 @@ export default function DashboardPage() {
                 .from('jenjang')
                 .select('id, nama');
 
-            const jenjangMap = new Map();
-            jenjangData?.forEach(j => jenjangMap.set(j.id, j.nama));
+            const jenjangMap = new Map<string, string>();
+            jenjangData?.forEach((j: any) => jenjangMap.set(j.id, j.nama));
 
             const { data: kelasData } = await supabase
                 .from('kelas')
                 .select('id, nama');
 
-            const kelasMap = new Map();
-            kelasData?.forEach(k => kelasMap.set(k.id, k.nama));
+            const kelasMap = new Map<string, string>();
+            kelasData?.forEach((k: any) => kelasMap.set(k.id, k.nama));
 
             const { data: profilesData } = await supabase
                 .from('profiles')
                 .select('id, full_name');
 
-            const profilesMap = new Map();
-            profilesData?.forEach(p => profilesMap.set(p.id, p.full_name));
+            const profilesMap = new Map<string, string>();
+            profilesData?.forEach((p: any) => profilesMap.set(p.id, p.full_name));
 
-            const saranWithRelations = saranData.map(s => ({
+            const saranWithRelations = saranData.map((s: any) => ({
                 ...s,
                 jenjang_nama: jenjangMap.get(s.jenjang_id) || 'Unknown',
                 kelas_nama: kelasMap.get(s.kelas_id) || 'Unknown',
@@ -297,7 +297,7 @@ export default function DashboardPage() {
             setSaranList(saranWithRelations);
             setFilteredSaran(saranWithRelations);
 
-            const pendingCount = saranWithRelations.filter(s => s.status === 'pending').length;
+            const pendingCount = saranWithRelations.filter((s: any) => s.status === 'pending').length;
             setStats(prev => ({ ...prev, pendingSaran: pendingCount }));
 
         } catch (err) {
@@ -403,7 +403,7 @@ export default function DashboardPage() {
                 // ── Grafik 3: Kendala per Jenjang ────────────────────────────
                 const kendalaPerJenjangMap = new Map<string, { total: number; pending: number; diproses: number; selesai: number; ditolak: number }>();
 
-                jenjangData.forEach(j => {
+                jenjangData.forEach((j: { id: string; nama: string }) => {
                     kendalaPerJenjangMap.set(j.id, { total: 0, pending: 0, diproses: 0, selesai: 0, ditolak: 0 });
                 });
 
@@ -418,7 +418,7 @@ export default function DashboardPage() {
                     }
                 });
 
-                const kendalaChartData: KendalaPerJenjang[] = jenjangData.map(j => {
+                const kendalaChartData: KendalaPerJenjang[] = jenjangData.map((j: { id: string; nama: string }) => {
                     const data = kendalaPerJenjangMap.get(j.id) || { total: 0, pending: 0, diproses: 0, selesai: 0, ditolak: 0 };
                     return { jenjang: j.nama, ...data };
                 });
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                 }
             });
 
-            const kehadiranData: ChartDataItem[] = jenjangData.map(j => {
+            const kehadiranData: ChartDataItem[] = jenjangData.map((j: { id: string; nama: string }) => {
                 const total = totalSesiPerJenjang.get(j.id) || 0;
                 const hadir = hadirPerJenjang.get(j.id) || 0;
                 const pct = total > 0 ? Math.round((hadir / total) * 100) : 0;
@@ -512,10 +512,10 @@ export default function DashboardPage() {
     ): ChartDataItem[] => {
         const filteredMateri = filterMateriId === 'semua'
             ? materiList
-            : materiList.filter(m => m.id === filterMateriId);
+            : materiList.filter((m: any) => m.id === filterMateriId);
 
         const materiPerJenjang = new Map<string, number>();
-        filteredMateri.forEach(m => {
+        filteredMateri.forEach((m: any) => {
             if (m.jenjang_id) {
                 materiPerJenjang.set(m.jenjang_id, (materiPerJenjang.get(m.jenjang_id) || 0) + 1);
             }
@@ -532,7 +532,7 @@ export default function DashboardPage() {
             }
         });
 
-        return jenjangData.map(j => {
+        return jenjangData.map((j: { id: string; nama: string }) => {
             const bMurid = muridPerJenjang.get(j.id) || 0;
             const bMateri = materiPerJenjang.get(j.id) || 0;
             const bTarget = targetPerJenjang.get(j.id) || 0;
@@ -556,7 +556,7 @@ export default function DashboardPage() {
 
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
-            filtered = filtered.filter(k =>
+            filtered = filtered.filter((k: any) =>
                 k.judul.toLowerCase().includes(term) ||
                 k.deskripsi.toLowerCase().includes(term) ||
                 (k.guru_nama && k.guru_nama.toLowerCase().includes(term))
@@ -564,11 +564,11 @@ export default function DashboardPage() {
         }
 
         if (statusFilter !== 'semua') {
-            filtered = filtered.filter(k => k.status === statusFilter);
+            filtered = filtered.filter((k: any) => k.status === statusFilter);
         }
 
         if (jenjangFilter !== 'semua') {
-            filtered = filtered.filter(k => k.jenjang_id === jenjangFilter);
+            filtered = filtered.filter((k: any) => k.jenjang_id === jenjangFilter);
         }
 
         setFilteredKendala(filtered);
@@ -580,7 +580,7 @@ export default function DashboardPage() {
 
         if (searchTermSaran) {
             const term = searchTermSaran.toLowerCase();
-            filtered = filtered.filter(s =>
+            filtered = filtered.filter((s: any) =>
                 s.judul.toLowerCase().includes(term) ||
                 s.deskripsi.toLowerCase().includes(term) ||
                 (s.guru_nama && s.guru_nama.toLowerCase().includes(term))
@@ -588,11 +588,11 @@ export default function DashboardPage() {
         }
 
         if (statusFilterSaran !== 'semua') {
-            filtered = filtered.filter(s => s.status === statusFilterSaran);
+            filtered = filtered.filter((s: any) => s.status === statusFilterSaran);
         }
 
         if (jenjangFilterSaran !== 'semua') {
-            filtered = filtered.filter(s => s.jenjang_id === jenjangFilterSaran);
+            filtered = filtered.filter((s: any) => s.jenjang_id === jenjangFilterSaran);
         }
 
         setFilteredSaran(filtered);
@@ -654,7 +654,7 @@ export default function DashboardPage() {
             });
 
             const formatDataList = (dataList: any[]) =>
-                dataList.map(item => ({
+                dataList.map((item: any) => ({
                     jenjang: jenjangMap.get(item.jenjang_id) || '-',
                     kelas: item.kelas_id ? (kelasMap.get(item.kelas_id) || '-') : '-',
                     judul: item.judul,
@@ -693,7 +693,7 @@ export default function DashboardPage() {
 
     // Format label periode untuk ditampilkan
     const getPeriodeLabel = (periode: PeriodeFilter): string => {
-        const labels = {
+        const labels: Record<PeriodeFilter, string> = {
             mingguan: '7 Hari Terakhir',
             bulanan: '30 Hari Terakhir',
             semester: '6 Bulan Terakhir',
@@ -849,11 +849,11 @@ export default function DashboardPage() {
                                             fontSize: 11,
                                             fontWeight: 700,
                                             fill: '#44403c',
-                                            formatter: (v: number) => `${v}%`,
+                                            formatter: (v: any) => `${v}%`,
                                             dy: -8
-                                        }}
+                                        } as any}
                                     >
-                                        {kehadiranChart.map((_, idx) => (
+                                        {kehadiranChart.map((item: any, idx: number) => (
                                             <Cell key={idx} fill={BAR_COLORS[idx % BAR_COLORS.length]} />
                                         ))}
                                     </Bar>
@@ -933,11 +933,11 @@ export default function DashboardPage() {
                                             fontSize: 11,
                                             fontWeight: 700,
                                             fill: '#44403c',
-                                            formatter: (v: number) => `${v}%`,
+                                            formatter: (v: any) => `${v}%`,
                                             dy: -8
-                                        }}
+                                        } as any}
                                     >
-                                        {capaianChart.map((_, idx) => (
+                                        {capaianChart.map((item: any, idx: number) => (
                                             <Cell key={idx} fill={BAR_COLORS[idx % BAR_COLORS.length]} />
                                         ))}
                                     </Bar>
@@ -1032,7 +1032,7 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {filteredKendala.slice(0, 5).map((kendala) => (
+                            {filteredKendala.slice(0, 5).map((kendala: any) => (
                                 <div
                                     key={kendala.id}
                                     className="bg-white border border-stone-100 rounded-2xl p-5 hover:shadow-md transition-all duration-300"
@@ -1144,7 +1144,7 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {filteredSaran.slice(0, 5).map((saran) => (
+                            {filteredSaran.slice(0, 5).map((saran: any) => (
                                 <div
                                     key={saran.id}
                                     className="bg-white border border-stone-100 rounded-2xl p-5 hover:shadow-md transition-all duration-300"

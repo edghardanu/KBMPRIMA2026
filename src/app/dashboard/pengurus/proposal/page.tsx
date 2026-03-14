@@ -82,7 +82,7 @@ export default function PengurusProposalPage() {
             });
             
             // Update local state instead of re-fetching
-            setProposals(prev => prev.map(p => p.id === proposalId ? data : p));
+            setProposals(prev => prev.map((p: any) => p.id === proposalId ? data : p));
         } catch (error: any) {
             Swal.fire('Gagal', error.message, 'error');
         } finally {
@@ -124,14 +124,14 @@ export default function PengurusProposalPage() {
     };
 
     // Filter proposals
-    const filtered = proposals.filter(p => {
+    const filtered = proposals.filter((p: any) => {
         if (filterStatus !== 'all' && p.status !== filterStatus) return false;
         if (searchTerm && !p.judul.toLowerCase().includes(searchTerm.toLowerCase()) &&
             !p.creator?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
         return true;
     });
 
-    const pendingCount = proposals.filter(p => p.status === 'submitted').length;
+    const pendingCount = proposals.filter((p: any) => p.status === 'submitted').length;
 
     if (loading) return <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div></div>;
 
@@ -153,10 +153,10 @@ export default function PengurusProposalPage() {
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-                    <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Cari judul atau nama guru..."
+                    <input value={searchTerm} onChange={(e: any) => setSearchTerm(e.target.value)} placeholder="Cari judul atau nama guru..."
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                 </div>
-                <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+                <select value={filterStatus} onChange={(e: any) => setFilterStatus(e.target.value)}
                     className="px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                     <option value="all">Semua Status</option>
                     <option value="submitted">Menunggu Review</option>
@@ -177,7 +177,7 @@ export default function PengurusProposalPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {filtered.map(p => (
+                    {filtered.map((p: any) => (
                         <div key={p.id} className={`bg-white border rounded-2xl overflow-hidden transition-all ${p.status === 'submitted' ? 'border-blue-200 shadow-sm shadow-blue-50' : 'border-stone-200'}`}>
                             {/* Header card */}
                             <div className="p-5">

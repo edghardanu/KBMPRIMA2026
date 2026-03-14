@@ -33,7 +33,7 @@ export default function OrangtuaMateriPage() {
         const fetchRecap = async () => {
             setLoading(true);
             const { data: links } = await supabase.from('murid_orangtua').select('murid_id').eq('orangtua_id', profile.id);
-            const childIds = (links as { murid_id: string }[] | null)?.map(l => l.murid_id) || [];
+            const childIds = (links as { murid_id: string }[] | null)?.map((l: { murid_id: string }) => l.murid_id) || [];
             if (childIds.length === 0) { setRecap([]); setLoading(false); return; }
 
             const { data } = await supabase.from('target_materi').select('*, murid(id, nama), materi(id, nama)').in('murid_id', childIds).eq('jenjang_id', selectedJenjang).order('tanggal', { ascending: false });

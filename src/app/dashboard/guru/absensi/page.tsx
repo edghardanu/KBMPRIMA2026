@@ -31,7 +31,7 @@ export default function GuruAbsensiPage() {
 
     useEffect(() => {
         if (!selectedJenjang) return;
-        const filteredKelas = allKelasList.filter(k => k.jenjang_id === selectedJenjang && k.guru_id === profile?.id);
+        const filteredKelas = allKelasList.filter((k: any) => k.jenjang_id === selectedJenjang && k.guru_id === profile?.id);
         setKelasList(filteredKelas);
         if (filteredKelas.length > 0) {
             setSelectedKelas(filteredKelas[0].id);
@@ -140,13 +140,13 @@ export default function GuruAbsensiPage() {
                 <div>
                     <label className="block text-sm text-stone-700 mb-1">Jenjang</label>
                     <select value={selectedJenjang} onChange={(e) => setSelectedJenjang(e.target.value)} className="w-full px-4 py-3 bg-white shadow-sm border border-stone-300 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                        {jenjangList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
                     </select>
                 </div>
                 <div>
                     <label className="block text-sm text-stone-700 mb-1">Kelas</label>
                     <select value={selectedKelas} onChange={(e) => setSelectedKelas(e.target.value)} className="w-full px-4 py-3 bg-white shadow-sm border border-stone-300 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                        {kelasList.map(k => <option key={k.id} value={k.id}>{k.nama}</option>)}
+                        {kelasList.map((k: any) => <option key={k.id} value={k.id}>{k.nama}</option>)}
                         {kelasList.length === 0 && <option value="">Tidak ada kelas</option>}
                     </select>
                 </div>
@@ -161,7 +161,7 @@ export default function GuruAbsensiPage() {
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 animate-pulse space-y-6">
                     <div className="h-6 bg-stone-200 rounded w-1/4"></div>
                     <div className="space-y-4">
-                        {[1, 2, 3, 4].map(i => (
+                        {[1, 2, 3, 4].map((i: number) => (
                             <div key={i} className="flex gap-4 items-center p-4 border border-stone-100 rounded-xl">
                                 <div className="h-8 w-8 bg-stone-200 rounded-full"></div>
                                 <div className="flex-1 space-y-2">

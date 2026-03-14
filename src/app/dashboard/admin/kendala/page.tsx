@@ -31,7 +31,7 @@ export default function AdminKendalaPage() {
                     <h2 className="text-2xl font-bold text-stone-900">Kendala KBM</h2>
                     <p className="text-stone-700 text-sm">Lihat kendala yang dilaporkan guru</p>
                 </div>
-                <button onClick={() => exportKendalaToPDF(kendalaList.map(k => ({ judul: k.judul, deskripsi: k.deskripsi, jenjang: k.jenjang?.nama || '-', status: k.status, tanggal: new Date(k.created_at).toLocaleDateString('id-ID') })))} disabled={kendalaList.length === 0} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl text-sm font-medium hover:from-green-500 hover:to-emerald-500 transition-all disabled:opacity-50">
+                <button onClick={() => exportKendalaToPDF(kendalaList.map((k: any) => ({ judul: k.judul, deskripsi: k.deskripsi, jenjang: k.jenjang?.nama || '-', status: k.status, tanggal: new Date(k.created_at).toLocaleDateString('id-ID') })))} disabled={kendalaList.length === 0} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl text-sm font-medium hover:from-green-500 hover:to-emerald-500 transition-all disabled:opacity-50">
                     <FileDown className="w-4 h-4" /> Export PDF
                 </button>
             </div>
@@ -40,7 +40,7 @@ export default function AdminKendalaPage() {
                 <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div></div>
             ) : (
                 <div className="space-y-4">
-                    {kendalaList.map((k) => (
+                    {kendalaList.map((k: any) => (
                         <div key={k.id} className="bg-white shadow-sm border border-stone-300 backdrop-blur-xl border border-stone-300 rounded-2xl p-5 hover:border-stone-300 transition-all">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">

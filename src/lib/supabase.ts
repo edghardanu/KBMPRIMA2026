@@ -22,6 +22,10 @@ async function noopLock<T>(
     return acquire();
 }
 
+// Fallback values for build time to prevent "missing URL/Key" errors during static generation
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+
 export function createClient() {
     // Client-side: persist the instance across HMR re-renders
     if (typeof window !== 'undefined') {
@@ -29,8 +33,8 @@ export function createClient() {
 
         if (!g.__supabaseClient) {
             g.__supabaseClient = createBrowserClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                supabaseUrl,
+                supabaseKey,
                 {
                     auth: {
                         persistSession: true,
@@ -54,8 +58,8 @@ export function createClient() {
 
     // Server-side (SSR) — stateless, no session persistence needed
     return createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl,
+        supabaseKey,
         {
             auth: {
                 storageKey: 'kbm-prima-auth-token',

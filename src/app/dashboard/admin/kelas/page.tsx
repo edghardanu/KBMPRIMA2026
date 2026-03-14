@@ -3,10 +3,16 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { Kelas, Jenjang, Profile } from '@/lib/types';
-import { Plus, Trash2, Edit2, Search, School, Loader2, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, School, Loader2, X } from 'lucide-react';
+
+// Tipe untuk Kelas dengan relasi
+type KelasWithRelations = Kelas & { 
+  jenjang: Jenjang; 
+  guru: Profile | null 
+};
 
 export default function AdminKelasPage() {
-    const [kelasList, setKelasList] = useState<(Kelas & { jenjang: Jenjang; guru: Profile | null })[]>([]);
+    const [kelasList, setKelasList] = useState<KelasWithRelations[]>([]);
     const [jenjangList, setJenjangList] = useState<Jenjang[]>([]);
     const [guruList, setGuruList] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -23,19 +29,35 @@ export default function AdminKelasPage() {
     const supabase = createClient();
 
     const fetchData = async () => {
-        const [kelasRes, jenjangRes, guruRes] = await Promise.all([
-            supabase.from('kelas').select('*, jenjang(*), guru:profiles(*)').order('created_at', { ascending: false }),
-            supabase.from('jenjang').select('*').order('urutan'),
-            supabase.from('profiles').select('*').eq('role', 'guru'),
-        ]);
-        setKelasList((kelasRes.data as any) || []);
-        setJenjangList(jenjangRes.data || []);
-        setGuruList(guruRes.data || []);
-        if (jenjangRes.data?.length && !jenjangId) setJenjangId(jenjangRes.data[0].id);
-        setLoading(false);
+        try {
+            const [kelasRes, jenjangRes, guruRes] = await Promise.all([
+                supabase.from('kelas').select('*, jenjang(*), guru:profiles(*)').order('created_at', { ascending: false }),
+                supabase.from('jenjang').select('*').order('urutan'),
+                supabase.from('profiles').select('*').eq('role', 'guru'),
+            ]);
+
+            if (kelasRes.error) throw kelasRes.error;
+            if (jenjangRes.error) throw jenjangRes.error;
+            if (guruRes.error) throw guruRes.error;
+
+            setKelasList((kelasRes.data as KelasWithRelations[]) || []);
+            setJenjangList(jenjangRes.data || []);
+            setGuruList(guruRes.data || []);
+            
+            // Set default jenjangId jika belum ada dan jenjangList tersedia
+            if (jenjangRes.data?.length && !jenjangId) {
+                setJenjangId(jenjangRes.data[0].id);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    useEffect(() => { fetchData(); }, []);
+    useEffect(() => { 
+        fetchData(); 
+    }, []);
 
     // Reset form
     const resetForm = () => {
@@ -47,7 +69,7 @@ export default function AdminKelasPage() {
     };
 
     // Handle edit - mengisi form dengan data yang akan diedit
-    const handleEdit = (kelas: Kelas & { jenjang: Jenjang; guru: Profile | null }) => {
+    const handleEdit = (kelas: KelasWithRelations) => {
         setEditingKelas(kelas);
         setNama(kelas.nama);
         setJenjangId(kelas.jenjang_id);
@@ -60,38 +82,56 @@ export default function AdminKelasPage() {
         e.preventDefault();
         setSubmitting(true);
 
-        const kelasData = {
-            nama,
-            jenjang_id: jenjangId,
-            guru_id: guruId || null,
-        };
+        try {
+            const kelasData = {
+                nama,
+                jenjang_id: jenjangId,
+                guru_id: guruId || null,
+            };
 
-        if (editingKelas) {
-            // Update data
-            await supabase
-                .from('kelas')
-                .update(kelasData)
-                .eq('id', editingKelas.id);
-        } else {
-            // Insert data baru
-            await supabase
-                .from('kelas')
-                .insert(kelasData);
+            if (editingKelas) {
+                // Update data
+                const { error } = await supabase
+                    .from('kelas')
+                    .update(kelasData)
+                    .eq('id', editingKelas.id);
+                
+                if (error) throw error;
+            } else {
+                // Insert data baru
+                const { error } = await supabase
+                    .from('kelas')
+                    .insert([kelasData]);
+                
+                if (error) throw error;
+            }
+
+            resetForm();
+            await fetchData(); // Refresh data setelah submit
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Gagal menyimpan data. Silakan coba lagi.');
+        } finally {
+            setSubmitting(false);
         }
-
-        resetForm();
-        setSubmitting(false);
-        fetchData();
     };
 
     const handleDelete = async (id: string) => {
         if (!confirm('Yakin ingin menghapus kelas ini?')) return;
-        await supabase.from('kelas').delete().eq('id', id);
-        fetchData();
+        
+        try {
+            const { error } = await supabase.from('kelas').delete().eq('id', id);
+            if (error) throw error;
+            await fetchData();
+        } catch (error) {
+            console.error('Error deleting data:', error);
+            alert('Gagal menghapus data. Silakan coba lagi.');
+        }
     };
 
-    const filtered = filterJenjang
-        ? kelasList.filter((k: any) => k.jenjang_id === filterJenjang)
+    // Filter kelas berdasarkan jenjang yang dipilih
+    const filteredKelas = filterJenjang
+        ? kelasList.filter((kelas) => kelas.jenjang_id === filterJenjang)
         : kelasList;
 
     return (
@@ -108,7 +148,11 @@ export default function AdminKelasPage() {
                         className="bg-white shadow-sm border border-stone-300 rounded-xl text-stone-900 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     >
                         <option value="">Semua Jenjang</option>
-                        {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                        {jenjangList.map((jenjang) => (
+                            <option key={jenjang.id} value={jenjang.id}>
+                                {jenjang.nama}
+                            </option>
+                        ))}
                     </select>
                     <button
                         onClick={() => {
@@ -150,7 +194,11 @@ export default function AdminKelasPage() {
                             required
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         >
-                            {jenjangList.map((j: any) => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                            {jenjangList.map((jenjang) => (
+                                <option key={jenjang.id} value={jenjang.id}>
+                                    {jenjang.nama}
+                                </option>
+                            ))}
                         </select>
                         <select
                             value={guruId}
@@ -158,7 +206,11 @@ export default function AdminKelasPage() {
                             className="px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         >
                             <option value="">Tanpa Guru</option>
-                            {guruList.map((g: any) => <option key={g.id} value={g.id}>{g.full_name}</option>)}
+                            {guruList.map((guru) => (
+                                <option key={guru.id} value={guru.id}>
+                                    {guru.full_name}
+                                </option>
+                            ))}
                         </select>
                         <div className="md:col-span-3 flex gap-3">
                             <button
@@ -182,10 +234,12 @@ export default function AdminKelasPage() {
             )}
 
             {loading ? (
-                <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div></div>
+                <div className="flex justify-center py-12">
+                    <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+                </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filtered.map((kelas: any) => (
+                    {filteredKelas.map((kelas) => (
                         <div key={kelas.id} className="bg-white shadow-sm border border-stone-300 rounded-2xl p-5 hover:border-emerald-200 transition-all group">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white">
@@ -209,7 +263,9 @@ export default function AdminKelasPage() {
                                 </div>
                             </div>
                             <h3 className="text-stone-900 font-semibold text-lg mb-1">{kelas.nama}</h3>
-                            <p className="text-sm text-stone-700 mb-2">Jenjang: <span className="text-emerald-600 font-medium">{kelas.jenjang?.nama}</span></p>
+                            <p className="text-sm text-stone-700 mb-2">
+                                Jenjang: <span className="text-emerald-600 font-medium">{kelas.jenjang?.nama}</span>
+                            </p>
                             <p className="text-sm text-stone-700">
                                 Guru: {kelas.guru?.full_name ? (
                                     <span className="text-stone-900">{kelas.guru.full_name}</span>
@@ -219,7 +275,7 @@ export default function AdminKelasPage() {
                             </p>
                         </div>
                     ))}
-                    {filtered.length === 0 && (
+                    {filteredKelas.length === 0 && (
                         <div className="col-span-full text-center py-12 text-stone-500">
                             Belum ada kelas. Klik &ldquo;Tambah Kelas&rdquo; untuk membuat.
                         </div>

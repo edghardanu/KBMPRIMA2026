@@ -26,7 +26,7 @@ export const getFonnteApiKey = async (): Promise<string | null> => {
             .from('app_settings')
             .select('value')
             .eq('key', 'fonnte_api_key')
-            .single();
+            .maybeSingle();
 
         cachedApiKey = data?.value || null;
         cacheTimestamp = now;
@@ -46,7 +46,7 @@ export const getAdminWhatsAppNumber = async (): Promise<string | null> => {
             .from('app_settings')
             .select('value')
             .eq('key', 'admin_whatsapp')
-            .single();
+            .maybeSingle();
 
         return data?.value || null;
     } catch {

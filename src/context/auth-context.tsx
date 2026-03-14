@@ -50,46 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
-                .single();
+                .maybeSingle();
 
             if (error) {
-                // Not found - retry then fallback
-                if (error.code === 'PGRST116') {
-                    if (attempts < 3) {
-                        console.log(`Profile not found (attempt ${attempts + 1}/3), retrying...`);
-                        await new Promise(resolve => setTimeout(resolve, 1500));
-                        return fetchProfile(userId, attempts + 1);
-                    }
-                    
-                    // Fallback: Try to create/get profile via function
-                    console.log('Fallback: Attempting to create profile via function...');
-                    try {
-                        const { data: user } = await supabase.auth.getUser();
-                        if (user?.user) {
-                            const { data: profileData, error: funcError } = await supabase
-                                .rpc('get_or_create_profile', {
-                                    user_id: user.user.id,
-                                    user_email: user.user.email,
-                                    user_role: user.user.user_metadata?.role || 'pending'
-                                });
-                            
-                            if (!funcError && profileData && profileData.length > 0) {
-                                setProfile(profileData[0] as Profile);
-                                console.log('Profile created/fetched via function');
-                                return;
-                            }
-                        }
-                    } catch (funcErr) {
-                        console.warn('Function fallback failed:', funcErr);
-                    }
-                    
-                    // Last resort: set null and proceed
-                    console.warn('Could not create profile - proceeding without profile');
-                    setProfile(null);
-                    return;
-                }
-
-                // Other errors (permission, etc)
                 console.warn('Could not fetch profile:', {
                     code: error.code,
                     message: error.message
@@ -97,6 +60,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setProfile(null);
             } else if (data) {
                 setProfile(data as Profile);
+            } else {
+                // data is null and error is null -> profile not found
+                if (attempts < 3) {
+                    console.log(`Profile not found (attempt ${attempts + 1}/3), retrying...`);
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    return fetchProfile(userId, attempts + 1);
+                }
+                
+                // Fallback: Try to create/get profile via function
+                console.log('Fallback: Attempting to create profile via function...');
+                try {
+                    const { data: user } = await supabase.auth.getUser();
+                    if (user?.user) {
+                        const { data: profileData, error: funcError } = await supabase
+                            .rpc('get_or_create_profile', {
+                                user_id: user.user.id,
+                                user_email: user.user.email,
+                                user_role: user.user.user_metadata?.role || 'pending'
+                            });
+                        
+                        if (!funcError && profileData && profileData.length > 0) {
+                            setProfile(profileData[0] as Profile);
+                            console.log('Profile created/fetched via function');
+                            return;
+                        }
+                    }
+                } catch (funcErr) {
+                    console.warn('Function fallback failed:', funcErr);
+                }
+                
+                // Last resort
+                setProfile(null);
             }
         } catch (err) {
             console.error('Error in fetchProfile:', err);

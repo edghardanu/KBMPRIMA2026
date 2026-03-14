@@ -31,7 +31,7 @@ export default function PublicMuridFormPage() {
         const init = async () => {
             try {
                 const [metaRes, jenjangRes, kelasRes] = await Promise.all([
-                    supabase.from('murid_forms').select('*').eq('token', t).single(),
+                    supabase.from('murid_forms').select('*').eq('token', t).maybeSingle(),
                     supabase.from('jenjang').select('*').order('urutan'),
                     supabase.from('kelas').select('*').order('nama'),
                 ]);

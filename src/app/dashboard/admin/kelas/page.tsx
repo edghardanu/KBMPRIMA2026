@@ -37,12 +37,11 @@ export default function AdminKelasPage() {
             setLoading(true);
             
             // Mengambil data kelas, jenjang, dan guru secara paralel
-            // Kita hapus join guru:profiles(*) di sini untuk keamanan jika relasi belum di-set di Supabase
-            // Kita akan melakukan mapping secara manual di frontend
+            // Kita gunakan manual mapping untuk semua relasi untuk menghindari error schema cache Supabase
             const [kelasRes, jenjangRes, guruRes] = await Promise.all([
                 supabase
                     .from('kelas')
-                    .select('*, jenjang(*)')
+                    .select('*')
                     .order('created_at', { ascending: false }),
                 supabase
                     .from('jenjang')
@@ -61,11 +60,13 @@ export default function AdminKelasPage() {
 
             const profiles = (guruRes.data as Profile[]) || [];
             const jenjangs = (jenjangRes.data as Jenjang[]) || [];
+            const rawKelas = (kelasRes.data as any[]) || [];
             
-            // Lakukan mapping guru secara manual
-            const mappedKelas = (kelasRes.data || []).map((k: any) => ({
+            // Lakukan mapping guru dan jenjang secara manual
+            const mappedKelas = rawKelas.map((k: any) => ({
                 ...k,
-                guru: profiles.find(p => p.id === k.guru_id) || null
+                jenjang: jenjangs.find((j: any) => j.id === k.jenjang_id),
+                guru: profiles.find((p: any) => p.id === k.guru_id) || null
             })) as KelasWithRelations[];
 
             setKelasList(mappedKelas);
@@ -134,7 +135,7 @@ export default function AdminKelasPage() {
                     .from('kelas')
                     .update(payload)
                     .eq('id', editingKelas.id)
-                    .select('*, jenjang(*)')
+                    .select('*')
                     .single();
                 data = res.data;
                 error = res.error;
@@ -142,7 +143,7 @@ export default function AdminKelasPage() {
                 const res = await supabase
                     .from('kelas')
                     .insert([payload])
-                    .select('*, jenjang(*)')
+                    .select('*')
                     .single();
                 data = res.data;
                 error = res.error;
@@ -151,10 +152,11 @@ export default function AdminKelasPage() {
             if (error) throw error;
             if (!data) throw new Error('Data tidak dikembalikan dari server');
 
-            // Map guru secara manual untuk data yang baru/diupdate
+            // Map jenjang dan guru secara manual untuk data yang baru/diupdate
             const updatedItem: KelasWithRelations = {
                 ...data,
-                guru: guruList.find(g => g.id === data.guru_id) || null
+                jenjang: jenjangList.find((j: any) => j.id === data.jenjang_id),
+                guru: guruList.find((g: any) => g.id === data.guru_id) || null
             };
 
             // Update state secara langsung untuk optimasi (tanpa full refetch)

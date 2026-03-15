@@ -27,12 +27,22 @@ export default function PengurusProposalPage() {
     }, []);
 
     const fetchProposals = async () => {
-        const { data } = await supabase
-            .from('proposal_kegiatan')
-            .select('*, jenjang(nama), creator:profiles!proposal_kegiatan_created_by_fkey(full_name)')
-            .in('status', ['submitted', 'disetujui', 'revisi', 'ditolak'])
-            .order('created_at', { ascending: false });
-        setProposals(data || []);
+        const [proposalRes, jenjangRes] = await Promise.all([
+            supabase
+                .from('proposal_kegiatan')
+                .select('*, creator:profiles!proposal_kegiatan_created_by_fkey(full_name)')
+                .in('status', ['submitted', 'disetujui', 'revisi', 'ditolak'])
+                .order('created_at', { ascending: false }),
+            supabase.from('jenjang').select('*')
+        ]);
+
+        const jenjangs = jenjangRes.data || [];
+        const mappedProposals = (proposalRes.data || []).map((p: any) => ({
+            ...p,
+            jenjang: jenjangs.find((j: any) => j.id === p.jenjang_id)
+        }));
+
+        setProposals(mappedProposals);
         setLoading(false);
     };
 
@@ -70,10 +80,16 @@ export default function PengurusProposalPage() {
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', proposalId)
-                .select('*, jenjang(nama), creator:profiles!proposal_kegiatan_created_by_fkey(full_name)')
+                .select('*, creator:profiles!proposal_kegiatan_created_by_fkey(full_name)')
                 .single();
 
             if (error) throw error;
+
+            const { data: jenjangData } = await supabase.from('jenjang').select('*').eq('id', data.jenjang_id).single();
+            const mappedData = {
+                ...data,
+                jenjang: jenjangData || null
+            };
 
             Swal.fire({
                 icon: 'success',
@@ -82,7 +98,7 @@ export default function PengurusProposalPage() {
             });
             
             // Update local state instead of re-fetching
-            setProposals(prev => prev.map((p: any) => p.id === proposalId ? data : p));
+            setProposals(prev => prev.map((p: any) => p.id === proposalId ? mappedData : p));
         } catch (error: any) {
             Swal.fire('Gagal', error.message, 'error');
         } finally {

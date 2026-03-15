@@ -43,14 +43,20 @@ export default function GuruProposalPage() {
             const [{ data: jenjangData }, { data: proposalData }] = await Promise.all([
                 supabase.from('jenjang').select('*').order('urutan'),
                 supabase.from('proposal_kegiatan')
-                    .select('*, jenjang(nama)')
+                    .select('*')
                     .eq('created_by', profile?.id)
                     .order('created_at', { ascending: false }),
             ]);
 
-            setJenjangList(jenjangData || []);
-            setProposals(proposalData || []);
-            if (jenjangData?.length) setJenjangId(jenjangData[0].id);
+            const jenjangs = jenjangData || [];
+            const mappedProposals = (proposalData || []).map((p: any) => ({
+                ...p,
+                jenjang: jenjangs.find((j: any) => j.id === p.jenjang_id)
+            }));
+
+            setJenjangList(jenjangs);
+            setProposals(mappedProposals);
+            if (jenjangs.length && !jenjangId) setJenjangId(jenjangs[0].id);
             setLoading(false);
         };
         if (profile?.id) fetchData();
@@ -120,18 +126,24 @@ export default function GuruProposalPage() {
                     .from('proposal_kegiatan')
                     .update(payload)
                     .eq('id', editId)
-                    .select('*, jenjang(nama)')
+                    .select('*')
                     .single();
                 if (error) throw error;
-                updatedProposal = data;
+                updatedProposal = {
+                    ...data,
+                    jenjang: jenjangList.find((j: any) => j.id === data.jenjang_id)
+                };
             } else {
                 const { data, error } = await supabase
                     .from('proposal_kegiatan')
                     .insert(payload)
-                    .select('*, jenjang(nama)')
+                    .select('*')
                     .single();
                 if (error) throw error;
-                updatedProposal = data;
+                updatedProposal = {
+                    ...data,
+                    jenjang: jenjangList.find((j: any) => j.id === data.jenjang_id)
+                };
             }
 
             Swal.fire({

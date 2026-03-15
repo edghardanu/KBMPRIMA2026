@@ -17,8 +17,21 @@ export default function PengurusSaranPage() {
     const supabase = createClient();
 
     const fetchData = async () => {
-        const { data } = await supabase.from('saran').select('*, jenjang(*), creator:profiles!saran_created_by_fkey(full_name)').order('created_at', { ascending: false });
-        setSaranList((data as any) || []);
+        const [saranRes, jenjangRes] = await Promise.all([
+            supabase
+                .from('saran')
+                .select('*, creator:profiles!saran_created_by_fkey(full_name)')
+                .order('created_at', { ascending: false }),
+            supabase.from('jenjang').select('*').order('urutan')
+        ]);
+
+        const jenjangs = (jenjangRes.data as Jenjang[]) || [];
+        const mappedSaran = ((saranRes.data as any[]) || []).map((s: any) => ({
+            ...s,
+            jenjang: jenjangs.find((j: any) => j.id === s.jenjang_id)
+        }));
+
+        setSaranList(mappedSaran as (Saran & { jenjang: Jenjang })[]);
         setLoading(false);
     };
 

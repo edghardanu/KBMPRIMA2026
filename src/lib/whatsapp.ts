@@ -126,27 +126,49 @@ export const sendDailyReports = async (tanggal?: string): Promise<{
     let totalFailed = 0;
 
     try {
-        // 1. Ambil semua murid aktif beserta nomor WA ortu
-        const { data: muridList } = await supabase
+        // 1. Ambil data pendukung untuk mapping secara manual (menghindari error relasi di Supabase)
+        const [jenjangRes, kelasRes, materiNameRes] = await Promise.all([
+            supabase.from('jenjang').select('id, nama'),
+            supabase.from('kelas').select('id, nama'),
+            supabase.from('materi').select('id, nama'),
+        ]);
+
+        const jenjangMap = new Map((jenjangRes.data || []).map((j: any) => [j.id, j.nama]));
+        const kelasMap = new Map((kelasRes.data || []).map((k: any) => [k.id, k.nama]));
+        const materiMapData = new Map((materiNameRes.data || []).map((m: any) => [m.id, m.nama]));
+
+        // 2. Ambil semua murid aktif
+        const { data: rawMuridList } = await supabase
             .from('murid')
-            .select('id, nama, whatsapp_ortu, jenjang_id, kelas_id, kelas(nama), jenjang(nama)')
+            .select('id, nama, whatsapp_ortu, jenjang_id, kelas_id')
             .eq('is_active', true);
 
-        if (!muridList || muridList.length === 0) {
+        if (!rawMuridList || rawMuridList.length === 0) {
             return { totalSent: 0, totalFailed: 0, details: [] };
         }
 
-        // 2. Ambil data absensi hari ini
+        const muridList = rawMuridList.map((m: any) => ({
+            ...m,
+            jenjang: { nama: jenjangMap.get(m.jenjang_id) || '-' },
+            kelas: { nama: kelasMap.get(m.kelas_id) || '-' },
+        }));
+
+        // 3. Ambil data absensi hari ini
         const { data: absensiList } = await supabase
             .from('absensi')
             .select('murid_id, status, keterangan')
             .eq('tanggal', targetDate);
 
-        // 3. Ambil data target materi hari ini
-        const { data: materiList } = await supabase
+        // 4. Ambil data target materi hari ini
+        const { data: rawTargetMateriList } = await supabase
             .from('target_materi')
-            .select('murid_id, status, catatan, materi(nama)')
+            .select('murid_id, materi_id, status, catatan')
             .eq('tanggal', targetDate);
+
+        const materiList = (rawTargetMateriList || []).map((t: any) => ({
+            ...t,
+            materi: { nama: materiMapData.get(t.materi_id) || '-' }
+        }));
 
         const absensiMap = new Map<string, { status: string; keterangan: string }>();
         absensiList?.forEach((a: any) => {

@@ -12,8 +12,18 @@ export default function AdminKendalaPage() {
     const supabase = createClient();
 
     const fetchData = async () => {
-        const { data } = await supabase.from('kendala').select('*, jenjang(*), creator:profiles!kendala_created_by_fkey(full_name)').order('created_at', { ascending: false });
-        setKendalaList((data as any) || []);
+        const [kendalaRes, jenjangRes] = await Promise.all([
+            supabase.from('kendala').select('*, creator:profiles!kendala_created_by_fkey(full_name)').order('created_at', { ascending: false }),
+            supabase.from('jenjang').select('*')
+        ]);
+
+        const jenjangs = jenjangRes.data || [];
+        const mappedKendala = (kendalaRes.data || []).map((k: any) => ({
+            ...k,
+            jenjang: jenjangs.find((j: any) => j.id === k.jenjang_id)
+        }));
+
+        setKendalaList(mappedKendala as (Kendala & { jenjang: Jenjang })[]);
         setLoading(false);
     };
     useEffect(() => { fetchData(); }, []);

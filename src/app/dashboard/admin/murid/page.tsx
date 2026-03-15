@@ -98,11 +98,11 @@ export default function AdminMuridPage() {
         setLoading(true);
         try {
             const [muridRes, kelasRes, jenjangRes, orangtuaRes, muridOrtuRes] = await Promise.all([
-                supabase.from('murid').select('*, kelas(*), jenjang(*)').order('nama'),
-                supabase.from('kelas').select('*, jenjang(*)').order('nama'),
+                supabase.from('murid').select('*').order('nama'),
+                supabase.from('kelas').select('*').order('nama'),
                 supabase.from('jenjang').select('*').order('urutan'),
                 supabase.from('profiles').select('*').eq('role', 'orangtua'),
-                supabase.from('murid_orangtua').select('*, orangtua:profiles!murid_orangtua_orangtua_id_fkey(*)'),
+                supabase.from('murid_orangtua').select('*'),
             ]);
 
             // Debug log
@@ -112,20 +112,37 @@ export default function AdminMuridPage() {
                 console.log('Current Auth User:', user.id, 'Role:', profile?.role);
             }
 
-            setMuridList((muridRes.data as any) || []);
-            setKelasList((kelasRes.data as any) || []);
-            setJenjangList(jenjangRes.data || []);
-            setOrangtuaList(orangtuaRes.data || []);
+            const rawMurid = (muridRes.data as any[]) || [];
+            const rawKelas = (kelasRes.data as any[]) || [];
+            const jenjangs = (jenjangRes.data as any[]) || [];
+            const profiles = (orangtuaRes.data as any[]) || [];
+            const rawMuridOrtu = (muridOrtuRes.data as any[]) || [];
 
-            // Create mapping of murid_id to orangtua profile
+            // Mapping manual untuk relasi murid -> kelas -> jenjang
+            const mappedKelas = rawKelas.map((k: any) => ({
+                ...k,
+                jenjang: jenjangs.find((j: any) => j.id === k.jenjang_id)
+            })) as Kelas[];
+
+            const mappedMurid = rawMurid.map((m: any) => ({
+                ...m,
+                kelas: mappedKelas.find((k: any) => k.id === m.kelas_id),
+                jenjang: jenjangs.find((j: any) => j.id === m.jenjang_id)
+            })) as Murid[];
+
+            setMuridList(mappedMurid);
+            setKelasList(mappedKelas);
+            setJenjangList(jenjangs);
+            setOrangtuaList(profiles);
+
+            // Create mapping of murid_id to orangtua profile secara manual
             const mapping = new Map();
-            if (muridOrtuRes.data) {
-                muridOrtuRes.data.forEach((item: any) => {
-                    if (item.orangtua) {
-                        mapping.set(item.murid_id, item.orangtua);
-                    }
-                });
-            }
+            rawMuridOrtu.forEach((item: any) => {
+                const ortu = profiles.find((p: any) => p.id === item.orangtua_id);
+                if (ortu) {
+                    mapping.set(item.murid_id, ortu);
+                }
+            });
             setMuridOrangtuaMap(mapping);
 
             // Set default jenjang if available and no jenjangId selected

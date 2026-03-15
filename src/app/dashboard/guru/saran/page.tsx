@@ -40,8 +40,18 @@ export default function GuruSaranPage() {
     }, [selectedJenjang]);
 
     const fetchSaran = async () => {
-        const { data } = await supabase.from('saran').select('*, jenjang(nama)').eq('created_by', profile?.id).order('created_at', { ascending: false });
-        setSaranList(data || []);
+        const [saranRes, jenjangRes] = await Promise.all([
+            supabase.from('saran').select('*').eq('created_by', profile?.id).order('created_at', { ascending: false }),
+            supabase.from('jenjang').select('*')
+        ]);
+
+        const jenjangs = jenjangRes.data || [];
+        const mappedSaran = (saranRes.data || []).map((s: any) => ({
+            ...s,
+            jenjang: jenjangs.find((j: any) => j.id === s.jenjang_id)
+        }));
+
+        setSaranList(mappedSaran);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

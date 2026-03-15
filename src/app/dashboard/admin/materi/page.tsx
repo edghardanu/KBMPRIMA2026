@@ -223,12 +223,25 @@ export default function AdminMateriPage() {
                 .select('id, nama')
                 .eq('jenjang_id', selectedJenjang);
 
-            // 3. Fetch all target_materi logs
-            const { data } = await supabase
-                .from('target_materi')
-                .select('*, murid(id, nama), materi(id, nama)')
-                .eq('jenjang_id', selectedJenjang)
-                .order('tanggal', { ascending: false });
+            // 3. Fetch all target_materi logs and supporting data for mapping
+            const [targetMateriRes, muridsRes, materisRes] = await Promise.all([
+                supabase
+                    .from('target_materi')
+                    .select('*')
+                    .eq('jenjang_id', selectedJenjang)
+                    .order('tanggal', { ascending: false }),
+                supabase.from('murid').select('id, nama').eq('jenjang_id', selectedJenjang).eq('is_active', true),
+                supabase.from('materi').select('id, nama').eq('jenjang_id', selectedJenjang),
+            ]);
+
+            const targetMateriList = targetMateriRes.data || [];
+            const muridsData = muridsRes.data || [];
+            const materisData = materisRes.data || [];
+
+            const muridsMap = new Map(muridsData.map((m: any) => [m.id, m]));
+            const materisMap = new Map(materisData.map((m: any) => [m.id, m]));
+
+            const data = targetMateriList; // For compatibility with original logic below
 
             // 3b. Fetch all absensi
             const { data: absensiData } = await supabase
@@ -311,7 +324,7 @@ export default function AdminMateriPage() {
                 materiData.forEach((m: { id: string; nama: string }) => {
                     // Hitung realisasi per materi dalam periode ini
                     const realisasiPerMateri = filteredTargetMateri.filter(
-                        (d: any) => d.materi?.id === m.id && d.status === 'lancar'
+                        (d: any) => d.materi_id === m.id && d.status === 'lancar'
                     ).length;
 
                     // Target per materi dalam periode (setiap murid harus menguasai materi ini)
@@ -357,13 +370,13 @@ export default function AdminMateriPage() {
             if (totalMateri > 0) {
                 const muridLancarCount = new Map<string, Set<string>>();
                 filteredTargetMateri.forEach((d: any) => {
-                    const mId = d.murid?.id;
+                    const mId = d.murid_id;
                     if (d.status === 'lancar' && mId) {
                         if (!muridLancarCount.has(mId)) {
                             muridLancarCount.set(mId, new Set<string>());
                         }
-                        if (d.materi?.id) {
-                            muridLancarCount.get(mId)?.add(d.materi.id);
+                        if (d.materi_id) {
+                            muridLancarCount.get(mId)?.add(d.materi_id);
                         }
                     }
                 });
@@ -379,14 +392,18 @@ export default function AdminMateriPage() {
             }
 
             // 5. Set Detailed Table Logs dengan menyertakan murid_id
-            const recapData = filteredTargetMateri.map((d: any) => ({
-                nama: d.murid?.nama || '-',
-                materi: d.materi?.nama || '-',
-                status: d.status,
-                tanggal: new Date(d.tanggal).toLocaleDateString('id-ID'),
-                capaian: muridCapaianMap.get(d.murid?.id) || 0,
-                murid_id: d.murid?.id
-            }));
+            const recapData = filteredTargetMateri.map((d: any) => {
+                const murid = muridsMap.get(d.murid_id) as any;
+                const materi = materisMap.get(d.materi_id) as any;
+                return {
+                    nama: murid?.nama || '-',
+                    materi: materi?.nama || '-',
+                    status: d.status,
+                    tanggal: new Date(d.tanggal).toLocaleDateString('id-ID'),
+                    capaian: muridCapaianMap.get(d.murid_id) || 0,
+                    murid_id: d.murid_id
+                };
+            });
 
             setRecap(recapData);
             setFilteredRecap(recapData);

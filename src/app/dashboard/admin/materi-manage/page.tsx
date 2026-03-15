@@ -22,12 +22,19 @@ export default function AdminMateriManagePage() {
 
     const fetchData = async () => {
         const [materiRes, jenjangRes] = await Promise.all([
-            supabase.from('materi').select('*, jenjang(*)').order('created_at', { ascending: false }),
+            supabase.from('materi').select('*').order('created_at', { ascending: false }),
             supabase.from('jenjang').select('*').order('urutan'),
         ]);
-        setMateriList((materiRes.data as any) || []);
-        setJenjangList(jenjangRes.data || []);
-        if (jenjangRes.data?.length && !jenjangId) setJenjangId(jenjangRes.data[0].id);
+
+        const jenjangs = (jenjangRes.data as Jenjang[]) || [];
+        const mappedMateri = ((materiRes.data as any[]) || []).map((m: any) => ({
+            ...m,
+            jenjang: jenjangs.find((j: any) => j.id === m.jenjang_id)
+        }));
+
+        setMateriList(mappedMateri as (Materi & { jenjang: Jenjang })[]);
+        setJenjangList(jenjangs);
+        if (jenjangs.length && !jenjangId) setJenjangId(jenjangs[0].id);
         setLoading(false);
     };
 

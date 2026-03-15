@@ -40,7 +40,7 @@ export default function PengurusKelasPage() {
             const [kelasRes, jenjangRes, guruRes] = await Promise.all([
                 supabase
                     .from('kelas')
-                    .select('*, jenjang(*), guru:profiles(*)')
+                    .select('*')
                     .order('created_at', { ascending: false }),
                 supabase
                     .from('jenjang')
@@ -57,9 +57,20 @@ export default function PengurusKelasPage() {
             if (jenjangRes.error) throw jenjangRes.error;
             if (guruRes.error) throw guruRes.error;
 
-            setKelasList((kelasRes.data as KelasWithRelations[]) || []);
-            setJenjangList(jenjangRes.data || []);
-            setGuruList(guruRes.data || []);
+            const profiles = (guruRes.data as Profile[]) || [];
+            const jenjangs = (jenjangRes.data as Jenjang[]) || [];
+            const rawKelas = (kelasRes.data as Kelas[]) || [];
+
+            // Mapping manual untuk relasi jenjang dan guru agar lebih aman dari error schema cache
+            const mappedKelas = rawKelas.map((k: Kelas) => ({
+                ...k,
+                jenjang: jenjangs.find((j: Jenjang) => j.id === k.jenjang_id),
+                guru: profiles.find((p: Profile) => p.id === k.guru_id) || null
+            })) as KelasWithRelations[];
+
+            setKelasList(mappedKelas);
+            setJenjangList(jenjangs);
+            setGuruList(profiles);
 
             // Set default jenjang di form jika belum ada
             if (jenjangRes.data?.length > 0 && !jenjangId) {

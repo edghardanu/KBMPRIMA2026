@@ -36,22 +36,41 @@ export default function OrangtuaMateriPage() {
             const childIds = (links as { murid_id: string }[] | null)?.map((l: { murid_id: string }) => l.murid_id) || [];
             if (childIds.length === 0) { setRecap([]); setLoading(false); return; }
 
-            const { data } = await supabase.from('target_materi').select('*, murid(id, nama), materi(id, nama)').in('murid_id', childIds).eq('jenjang_id', selectedJenjang).order('tanggal', { ascending: false });
+            // Fetch target_materi logs and supporting data
+            const [targetMateriRes, muridRes, materiRes] = await Promise.all([
+                supabase
+                    .from('target_materi')
+                    .select('*')
+                    .in('murid_id', childIds)
+                    .eq('jenjang_id', selectedJenjang)
+                    .order('tanggal', { ascending: false }),
+                supabase.from('murid').select('id, nama').in('id', childIds),
+                supabase.from('materi').select('id, nama').eq('jenjang_id', selectedJenjang),
+            ]);
+
+            const targetMateriList = targetMateriRes.data || [];
+            const muridsData = muridRes.data || [];
+            const materisData = materiRes.data || [];
+
+            const muridsMap = new Map(muridsData.map((m: any) => [m.id, m]));
+            const materisMap = new Map(materisData.map((m: any) => [m.id, m]));
 
             // Fetch materi count to determine full completion requirement
-            const { count: materiCount } = await supabase.from('materi').select('*', { count: 'exact', head: true }).eq('jenjang_id', selectedJenjang);
-            const totalMateri = materiCount || 1;
+            const totalMateri = materisData.length || 1;
 
             // Calculate Capaian per Student incrementally (simulate 1-6 months process)
             const muridCapaianMap = new Map<string, number>();
             const muridLancarCount = new Map<string, Set<string>>();
 
-            (data || []).forEach((d: any) => {
-                if (d.status === 'lancar' && d.murid?.id && d.materi?.id && d.tanggal) {
-                    if (!muridLancarCount.has(d.murid.id)) {
-                        muridLancarCount.set(d.murid.id, new Set<string>());
+            targetMateriList.forEach((d: any) => {
+                const murid = muridsMap.get(d.murid_id);
+                const materi = materisMap.get(d.materi_id);
+
+                if (d.status === 'lancar' && d.murid_id && d.materi_id && d.tanggal) {
+                    if (!muridLancarCount.has(d.murid_id)) {
+                        muridLancarCount.set(d.murid_id, new Set<string>());
                     }
-                    muridLancarCount.get(d.murid.id)?.add(`${d.materi.id}-${d.tanggal}`);
+                    muridLancarCount.get(d.murid_id)?.add(`${d.materi_id}-${d.tanggal}`);
                 }
             });
 
@@ -64,13 +83,17 @@ export default function OrangtuaMateriPage() {
                 muridCapaianMap.set(muridId, pct);
             });
 
-            setRecap((data || []).map((d: any) => ({
-                nama: d.murid?.nama || '-',
-                materi: d.materi?.nama || '-',
-                status: d.status,
-                tanggal: new Date(d.tanggal).toLocaleDateString('id-ID'),
-                capaian: muridCapaianMap.get(d.murid?.id) || 0
-            })));
+            setRecap(targetMateriList.map((d: any) => {
+                const murid = muridsMap.get(d.murid_id) as any;
+                const materi = materisMap.get(d.materi_id) as any;
+                return {
+                    nama: murid?.nama || '-',
+                    materi: materi?.nama || '-',
+                    status: d.status,
+                    tanggal: new Date(d.tanggal).toLocaleDateString('id-ID'),
+                    capaian: muridCapaianMap.get(d.murid_id) || 0
+                };
+            }));
             setLoading(false);
         };
         fetchRecap();

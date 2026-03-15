@@ -37,10 +37,12 @@ export default function AdminKelasPage() {
             setLoading(true);
             
             // Mengambil data kelas, jenjang, dan guru secara paralel
+            // Kita hapus join guru:profiles(*) di sini untuk keamanan jika relasi belum di-set di Supabase
+            // Kita akan melakukan mapping secara manual di frontend
             const [kelasRes, jenjangRes, guruRes] = await Promise.all([
                 supabase
                     .from('kelas')
-                    .select('*, jenjang(*), guru:profiles(*)')
+                    .select('*, jenjang(*)')
                     .order('created_at', { ascending: false }),
                 supabase
                     .from('jenjang')
@@ -57,17 +59,31 @@ export default function AdminKelasPage() {
             if (jenjangRes.error) throw jenjangRes.error;
             if (guruRes.error) throw guruRes.error;
 
-            setKelasList((kelasRes.data as KelasWithRelations[]) || []);
-            setJenjangList(jenjangRes.data || []);
-            setGuruList(guruRes.data || []);
+            const profiles = (guruRes.data as Profile[]) || [];
+            const jenjangs = (jenjangRes.data as Jenjang[]) || [];
+            
+            // Lakukan mapping guru secara manual
+            const mappedKelas = (kelasRes.data || []).map((k: any) => ({
+                ...k,
+                guru: profiles.find(p => p.id === k.guru_id) || null
+            })) as KelasWithRelations[];
+
+            setKelasList(mappedKelas);
+            setJenjangList(jenjangs);
+            setGuruList(profiles);
             
             // Set default jenjang di form jika belum ada
-            if (jenjangRes.data?.length > 0 && !jenjangId) {
-                setJenjangId(jenjangRes.data[0].id);
+            if (jenjangs.length > 0 && !jenjangId) {
+                setJenjangId(jenjangs[0].id);
             }
         } catch (error: any) {
             console.error('Error fetching data:', error);
-            Swal.fire('Error', `Gagal memuat data: ${error.message}`, 'error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Memuat Data',
+                text: error.message || 'Terjadi kesalahan saat sinkronisasi data.',
+                confirmButtonColor: '#10b981',
+            });
         } finally {
             setLoading(false);
         }
@@ -110,32 +126,55 @@ export default function AdminKelasPage() {
                 guru_id: guruId || null,
             };
 
+            let data;
             let error;
+
             if (editingKelas) {
                 const res = await supabase
                     .from('kelas')
                     .update(payload)
-                    .eq('id', editingKelas.id);
+                    .eq('id', editingKelas.id)
+                    .select('*, jenjang(*)')
+                    .single();
+                data = res.data;
                 error = res.error;
             } else {
                 const res = await supabase
                     .from('kelas')
-                    .insert([payload]);
+                    .insert([payload])
+                    .select('*, jenjang(*)')
+                    .single();
+                data = res.data;
                 error = res.error;
             }
             
             if (error) throw error;
+            if (!data) throw new Error('Data tidak dikembalikan dari server');
+
+            // Map guru secara manual untuk data yang baru/diupdate
+            const updatedItem: KelasWithRelations = {
+                ...data,
+                guru: guruList.find(g => g.id === data.guru_id) || null
+            };
+
+            // Update state secara langsung untuk optimasi (tanpa full refetch)
+            if (editingKelas) {
+                setKelasList(prev => prev.map(k => k.id === editingKelas.id ? updatedItem : k));
+            } else {
+                setKelasList(prev => [updatedItem, ...prev]);
+            }
 
             Swal.fire({
                 icon: 'success',
                 title: editingKelas ? 'Berhasil Diperbarui' : 'Berhasil Ditambahkan',
                 text: `Data kelas ${nama} berhasil disimpan.`,
                 timer: 2000,
-                showConfirmButton: false
+                showConfirmButton: false,
+                background: '#ffffff',
+                backdrop: 'rgba(16, 185, 129, 0.1)'
             });
             
             resetForm();
-            await fetchData();
         } catch (error: any) {
             console.error('Submission error:', error);
             Swal.fire('Gagal', error.message || 'Terjadi kesalahan saat menyimpan data', 'error');
@@ -161,8 +200,10 @@ export default function AdminKelasPage() {
                 const { error } = await supabase.from('kelas').delete().eq('id', id);
                 if (error) throw error;
                 
+                // Update state secara langsung
+                setKelasList(prev => prev.filter(k => k.id !== id));
+
                 Swal.fire('Terhapus!', 'Kelas berhasil dihapus.', 'success');
-                await fetchData();
             } catch (error: any) {
                 Swal.fire('Gagal', error.message, 'error');
             }
@@ -398,6 +439,17 @@ export default function AdminKelasPage() {
                                         </div>
                                     </div>
                                 ))}
+
+                                {group.classes.length === 0 && (
+                                    <div className="col-span-full py-12 px-8 border-2 border-dashed border-stone-100 rounded-[40px] flex flex-col items-center justify-center gap-3 bg-stone-50/30">
+                                        <div className="w-12 h-12 rounded-full bg-stone-50 flex items-center justify-center">
+                                            <Info className="w-5 h-5 text-stone-300" />
+                                        </div>
+                                        <p className="text-stone-400 font-bold text-xs uppercase tracking-widest text-center">
+                                            Belum ada kelas terdaftar di jenjang {group.nama}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

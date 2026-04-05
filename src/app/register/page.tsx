@@ -51,7 +51,7 @@ export default function RegisterPage() {
         } else {
             setSuccess('Registrasi berhasil! Silakan login.');
             setTimeout(() => {
-                router.push('/login');
+                router.push('/');
             }, 2000);
         }
     };
@@ -163,7 +163,7 @@ export default function RegisterPage() {
 
                     <p className="text-center text-stone-500 text-sm font-medium mt-8">
                         Sudah memiliki akun?{' '}
-                        <Link href="/login" className="text-emerald-500 hover:text-emerald-600 font-bold underline underline-offset-4 decoration-emerald-200 hover:decoration-emerald-500 transition-all">
+                        <Link href="/" className="text-emerald-500 hover:text-emerald-600 font-bold underline underline-offset-4 decoration-emerald-200 hover:decoration-emerald-500 transition-all">
                             Masuk ke Akun
                         </Link>
                     </p>

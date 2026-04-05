@@ -232,7 +232,7 @@ export const sendDailyReports = async (tanggal?: string): Promise<{
             }
 
             message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `_Pesan otomatis oleh Sistem Monitoring KBM PRIMA_`;
+            message += `_Pesan otomatis oleh BOT KBM PRIMA_`;
 
             // Kirim pesan
             const result = await sendWhatsAppMessage(murid.whatsapp_ortu, message);
@@ -255,14 +255,16 @@ export const sendDailyReports = async (tanggal?: string): Promise<{
 
 export const formatMaterialReport = (studentName: string, materialName: string, status: string, notes: string) => {
     const emoji = status === 'lancar' ? '✅' : '⚠️';
-    return `*LAPORAN PENCAPAIAN MATERI SISWA*\n\n` +
-        `Yth. Orang Tua/Wali, berikut adalah laporan pencapaian materi siswa:\n\n` +
-        `Nama: *${studentName}*\n` +
+    return `*[KBM-PRIMA]*\n` +
+        `Assalaamu'alaikum Wr Wb,\n` +
+        `Yth. Bapak/Ibu Orangtua/Wali Murid *${studentName}*\n\n\n` +
         `Materi: ${materialName}\n` +
         `Status: ${status.toUpperCase()} ${emoji}\n` +
         `Catatan: ${notes || '-'}\n\n` +
-        `Demikian informasi ini kami sampaikan. Terima kasih.\n\n` +
-        `_Pesan otomatis oleh Sistem Monitoring KBMPRIMA_`;
+        `NB:\n` +
+        `- Amalsholih bapak/ibu bantu diingatkan lagi kepada putra/putrinya untuk membawa peralatan mengaji nya\n` +
+        `- Amalsholih bapak/ibu diberikan motivasi kepada putra/putrinya supaya semangat dalam mengajinya.\n\n` +
+        `الحمد للّٰه جزاكم اللّٰه خيرًا 😇🙏🏻`;
 };
 
 export const formatAttendanceReport = (studentName: string, date: string, status: string, notes: string) => {
@@ -285,8 +287,8 @@ export const formatAttendanceReport = (studentName: string, date: string, status
         `Nama: *${studentName}*\n` +
         `Status: ${statusLabel}\n` +
         `Keterangan: ${notes || '-'}\n\n` +
-        `Terima kasih atas perhatian Anda.\n\n` +
-        `_Pesan otomatis oleh Sistem Monitoring KBMPRIMA_`;
+        `Alhamdulillahi Jaza Kumullohu.\n\n` +
+        `_Pesan otomatis oleh BOT KBM PRIMA_`;
 };
 
 // ── Utilitas ─────────────────────────────────────────────────────────────────

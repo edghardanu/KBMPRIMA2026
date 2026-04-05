@@ -113,6 +113,7 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const wantAccount = !!(email && password);
 
     const supabase = createClient();
     const filteredKelas = kelasList.filter(k => k.jenjang_id === jenjangId);
@@ -130,68 +131,76 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
         setSubmitting(true);
         setError(null);
 
-        // Validasi password
-        if (password !== confirmPassword) {
-            setError('Kata sandi tidak cocok');
-            setSubmitting(false);
-            return;
-        }
+        let userId: string | null = null;
 
-        if (password.length < 6) {
-            setError('Kata sandi minimal 6 karakter');
-            setSubmitting(false);
-            return;
+        if (wantAccount) {
+            // Validasi password
+            if (password !== confirmPassword) {
+                setError('Kata sandi tidak cocok');
+                setSubmitting(false);
+                return;
+            }
+
+            if (password.length < 6) {
+                setError('Kata sandi minimal 6 karakter');
+                setSubmitting(false);
+                return;
+            }
         }
 
         try {
             console.log('=== STARTING REGISTRATION ===');
 
-            // ============================================
-            // STEP 1: Signup ke Supabase Auth
-            // ============================================
-            console.log('Step 1: Signup user');
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: namaOrangTua,
-                        role: 'orangtua'
+            if (wantAccount) {
+                // ============================================
+                // STEP 1: Signup ke Supabase Auth
+                // ============================================
+                console.log('Step 1: Signup user');
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: namaOrangTua,
+                            role: 'orangtua'
+                        }
                     }
+                });
+
+                if (authError || !authData.user) {
+                    console.error('Step 1 FAILED:', authError);
+                    throw new Error(`Gagal membuat akun auth: ${authError?.message || 'Unknown error'}`);
                 }
-            });
 
-            if (authError || !authData.user) {
-                console.error('Step 1 FAILED:', authError);
-                throw new Error(`Gagal membuat akun auth: ${authError?.message || 'Unknown error'}`);
-            }
+                userId = authData.user.id;
+                console.log('✅ Step 1 OK - User created:', userId);
 
-            const userId = authData.user.id;
-            console.log('✅ Step 1 OK - User created:', userId);
+                console.log('Step 2: Checking and enforcing orangtua role in profiles table...');
 
-            console.log('Step 2: Checking and enforcing orangtua role in profiles table...');
+                let profileUpdated = false;
+                for (let i = 0; i < 3; i++) {
+                    const { error: profileUpdateError } = await supabase
+                        .from('profiles')
+                        .update({
+                            role: 'orangtua',
+                            full_name: namaOrangTua
+                        })
+                        .eq('id', userId);
 
-            let profileUpdated = false;
-            for (let i = 0; i < 3; i++) {
-                const { error: profileUpdateError } = await supabase
-                    .from('profiles')
-                    .update({
-                        role: 'orangtua',
-                        full_name: namaOrangTua
-                    })
-                    .eq('id', userId);
-
-                if (!profileUpdateError) {
-                    profileUpdated = true;
-                    console.log('✅ Profile enforced with Orangtua role');
-                    break;
+                    if (!profileUpdateError) {
+                        profileUpdated = true;
+                        console.log('✅ Profile enforced with Orangtua role');
+                        break;
+                    }
+                    // Wait briefly before retrying in case trigger hasn't finished
+                    await new Promise(resolve => setTimeout(resolve, 300));
                 }
-                // Wait briefly before retrying in case trigger hasn't finished
-                await new Promise(resolve => setTimeout(resolve, 300));
-            }
 
-            if (!profileUpdated) {
-                console.warn('⚠️ Could not explicitly force profile role, assuming trigger handled it');
+                if (!profileUpdated) {
+                    console.warn('⚠️ Could not explicitly force profile role, assuming trigger handled it');
+                }
+            } else {
+                console.log('Skipping Step 1 & 2: Email or password not provided');
             }
 
             // ============================================
@@ -220,39 +229,44 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
             const muridId = muridData.id;
             console.log('✅ Step 2 OK - Murid created:', muridId);
 
-            // ============================================
-            // STEP 4: Link murid dengan orangtua
-            // ============================================
-            console.log('Step 4: Creating link murid_orangtua');
-            const { error: linkError } = await supabase
-                .from('murid_orangtua')
-                .insert({
-                    murid_id: muridId,
-                    orangtua_id: userId
-                });
+            if (userId) {
+                // ============================================
+                // STEP 4: Link murid dengan orangtua
+                // ============================================
+                console.log('Step 4: Creating link murid_orangtua');
+                const { error: linkError } = await supabase
+                    .from('murid_orangtua')
+                    .insert({
+                        murid_id: muridId,
+                        orangtua_id: userId
+                    });
 
-            if (linkError) {
-                console.error('Step 3 FAILED:', linkError);
-                // Continue anyway - link is not critical for showing success
-                console.log('⚠️ Continuing despite link error');
-            } else {
-                console.log('✅ Step 3 OK - Link created');
+                if (linkError) {
+                    console.error('Step 4 FAILED:', linkError);
+                    // Continue anyway - link is not critical for showing success
+                    console.log('⚠️ Continuing despite link error');
+                } else {
+                    console.log('✅ Step 4 OK - Link created');
+                }
+
+                // ============================================
+                // STEP 5: Sign out to require fresh login
+                // ============================================
+                console.log('Step 5: Sign out user');
+                await supabase.auth.signOut();
             }
-
-            // ============================================
-            // STEP 5: Sign out to require fresh login
-            // ============================================
-            console.log('Step 5: Sign out user');
-            await supabase.auth.signOut();
 
             console.log('🎉 REGISTRATION COMPLETED SUCCESSFULLY!');
             setSubmitted(true);
 
             await Swal.fire({
                 title: 'Registrasi Berhasil! ✅',
-                html: `<p class="text-base">Akun untuk <strong>${namaOrangTua}</strong> telah berhasil dibuat.</p>
+                html: wantAccount 
+                    ? `<p class="text-base">Akun untuk <strong>${namaOrangTua}</strong> telah berhasil dibuat.</p>
                        <p class="text-sm text-gray-500 mt-2">Data siswa <strong>${nama}</strong> telah tersimpan.</p>
-                       <p class="text-xs text-gray-400 mt-3">Mengarahkan Anda ke halaman login...</p>`,
+                       <p class="text-xs text-gray-400 mt-3">Mengarahkan Anda ke halaman login...</p>`
+                    : `<p class="text-base">Data pendaftaran untuk <strong>${nama}</strong> telah berhasil disimpan.</p>
+                       <p class="text-sm text-gray-500 mt-2">Terima kasih telah mendaftar.</p>`,
                 icon: 'success',
                 timer: 1500,
                 showConfirmButton: false,
@@ -260,7 +274,17 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
                 allowEscapeKey: false
             });
 
-            window.location.href = '/login';
+            if (wantAccount) {
+                window.location.href = '/login';
+            } else {
+                // If no account created, maybe just show the success message without redirecting to login immediately
+                // or just stay on success screen. The current flow uses a Swal and then setting submitted state.
+                // Wait, line 249 sets submitted(true).
+                // Line 251 shows a Swal.
+                // Line 263 does a redirect.
+                // If no account, redirecting to /login might be confusing. 
+                // Maybe redirect to home or just let them see the success state.
+            }
 
         } catch (err: any) {
             console.error('❌ REGISTRATION ERROR:', err.message || err);
@@ -298,21 +322,25 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
                 <p className="text-stone-600 mb-4">
                     Data pendaftaran untuk <strong>{nama}</strong> telah tersimpan dengan aman.
                 </p>
-                <div className="bg-white/60 border border-emerald-200 rounded-xl p-4 mb-6 text-left text-sm">
-                    <p className="text-stone-700 font-medium mb-2">📝 Info Akun Anda:</p>
-                    <p className="text-stone-600"><strong>Email:</strong> {email}</p>
-                    <p className="text-stone-600 text-xs mt-1 text-stone-500">
-                        (Gunakan email dan kata sandi ini untuk login)
+                {wantAccount && (
+                    <div className="bg-white/60 border border-emerald-200 rounded-xl p-4 mb-6 text-left text-sm">
+                        <p className="text-stone-700 font-medium mb-2">📝 Info Akun Anda:</p>
+                        <p className="text-stone-600"><strong>Email:</strong> {email}</p>
+                        <p className="text-stone-600 text-xs mt-1 text-stone-500">
+                            (Gunakan email dan kata sandi ini untuk login)
+                        </p>
+                    </div>
+                )}
+                {wantAccount && (
+                    <p className="text-stone-500 text-sm mb-6">
+                        Mengarahkan Anda ke halaman login...
                     </p>
-                </div>
-                <p className="text-stone-500 text-sm mb-6">
-                    Mengarahkan Anda ke halaman login...
-                </p>
+                )}
                 <button
-                    onClick={() => { window.location.href = '/login'; }}
+                    onClick={() => { window.location.href = wantAccount ? '/login' : '/'; }}
                     className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-500 transition-colors"
                 >
-                    Ke Halaman Login
+                    {wantAccount ? 'Ke Halaman Login' : 'Kembali Ke Beranda'}
                 </button>
             </div>
         );
@@ -389,8 +417,7 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="email@contoh.com"
-                            required
+                            placeholder="email@contoh.com (Opsional)"
                             className="w-full px-6 py-4 bg-stone-50/50 border border-stone-100 rounded-[24px] text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/20 focus:bg-white transition-all font-medium"
                         />
                         <p className="text-[10px] font-bold text-stone-400 mt-2 px-1">Email ini akan digunakan untuk login ke sistem monitoring.</p>
@@ -404,7 +431,6 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Minimal 6 karakter"
-                                required
                                 className="w-full px-6 py-4 bg-stone-50/50 border border-stone-100 rounded-[24px] text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/20 focus:bg-white transition-all font-medium pr-12"
                             />
                             <button
@@ -425,7 +451,6 @@ function MuridFormClient({ formMeta, jenjangList, kelasList }: ClientProps) {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="Ulangi kata sandi"
-                                required
                                 className="w-full px-6 py-4 bg-stone-50/50 border border-stone-100 rounded-[24px] text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/20 focus:bg-white transition-all font-medium pr-12"
                             />
                             <button

@@ -287,7 +287,7 @@ export const formatAttendanceReport = (studentName: string, date: string, status
         `Nama: *${studentName}*\n` +
         `Status: ${statusLabel}\n` +
         `Keterangan: ${notes || '-'}\n\n` +
-        `Alhamdulillahi Jaza Kumullohu.\n\n` +
+        `Alhamdulillahi Jaza Kumullohu Khoiro.\n\n` +
         `_Pesan otomatis oleh BOT KBM PRIMA_`;
 };
 

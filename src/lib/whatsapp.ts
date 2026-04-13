@@ -261,7 +261,7 @@ export const formatMaterialReport = (studentName: string, materialName: string, 
         `Materi: ${materialName}\n`;
 
     if (hal) {
-        content += `Halaman: ${hal}${maxHal > 0 ? ` (dari max ${maxHal} hal)` : ''}\n`;
+        content += `Halaman: ${hal}${maxHal > 0 ? ` (dari ${maxHal} hal)` : ''}\n`;
     }
 
     content += `Status: ${status.toUpperCase()} ${emoji}\n` +

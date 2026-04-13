@@ -155,11 +155,16 @@ export default function GuruMateriPage() {
 
         for (const m of muridList) {
             if (m.whatsapp_ortu) {
+                const pages = checkedPages[m.id] || [];
+                const halString = pages.length > 0 ? pages.join(', ') : '';
+                
                 const message = formatMaterialReport(
                     m.nama,
                     materiName,
                     grades[m.id] || 'lancar',
-                    catatan[m.id] || ''
+                    catatan[m.id] || '',
+                    halString,
+                    maxPage
                 );
                 await sendWhatsAppMessage(m.whatsapp_ortu, message);
             }
@@ -315,8 +320,19 @@ export default function GuruMateriPage() {
                                             {i + 1}
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-stone-900">{m.nama}</h3>
-                                            <p className="text-xs text-stone-500">Status: {grades[m.id] === 'lancar' ? '✅ Lancar' : '⚠️ Kurang Lancar'}</p>
+                                            <h3 className="font-semibold text-stone-900 line-clamp-1">{m.nama}</h3>
+                                            <p className="text-xs text-stone-500">Status: {grades[m.id] === 'lancar' ? '✅ Lancar' : '⚠️ Kurang'}</p>
+                                            
+                                            {/* Riwayat Halaman (Kotak Biru) - Mobile */}
+                                            {(checkedPages[m.id] || []).length > 0 && (
+                                                <div className="mt-1 flex flex-wrap gap-1">
+                                                    {(checkedPages[m.id] || []).map(p => (
+                                                        <span key={p} className="px-1.5 py-0.5 bg-blue-600 text-white text-[9px] font-bold rounded shadow-sm">
+                                                            {p}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     {expandedRows[m.id] ? <ChevronUp className="w-5 h-5 text-stone-400" /> : <ChevronDown className="w-5 h-5 text-stone-400" />}
@@ -438,9 +454,20 @@ export default function GuruMateriPage() {
                                             <td className="px-6 py-4 text-sm text-stone-600">{i + 1}</td>
                                             <td className="px-6 py-4">
                                                 <div className="text-sm font-medium text-stone-900">{m.nama}</div>
-                                                <div className="text-xs text-stone-500">
+                                                <div className="text-xs text-stone-500 mb-2">
                                                     Terpilih: {(checkedPages[m.id] || []).length} halaman
                                                 </div>
+                                                
+                                                {/* Riwayat Halaman (Kotak Biru) - Desktop */}
+                                                {(checkedPages[m.id] || []).length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 max-w-[150px]">
+                                                        {(checkedPages[m.id] || []).map(p => (
+                                                            <span key={p} className="px-1.5 py-0.5 bg-blue-600 text-white text-[9px] font-bold rounded shadow-sm">
+                                                                {p}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex justify-center gap-2">

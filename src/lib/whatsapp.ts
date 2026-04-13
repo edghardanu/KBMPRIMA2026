@@ -253,18 +253,25 @@ export const sendDailyReports = async (tanggal?: string): Promise<{
 
 // ── Format Pesan ─────────────────────────────────────────────────────────────
 
-export const formatMaterialReport = (studentName: string, materialName: string, status: string, notes: string) => {
+export const formatMaterialReport = (studentName: string, materialName: string, status: string, notes: string, hal: string = '', maxHal: number = 0) => {
     const emoji = status === 'lancar' ? '✅' : '⚠️';
-    return `*[KBM-PRIMA]*\n` +
+    let content = `*[KBM-PRIMA]*\n` +
         `Assalaamu'alaikum Wr Wb,\n` +
         `Yth. Bapak/Ibu Orangtua/Wali Murid *${studentName}*\n\n\n` +
-        `Materi: ${materialName}\n` +
-        `Status: ${status.toUpperCase()} ${emoji}\n` +
+        `Materi: ${materialName}\n`;
+
+    if (hal) {
+        content += `Halaman: ${hal}${maxHal > 0 ? ` (dari max ${maxHal} hal)` : ''}\n`;
+    }
+
+    content += `Status: ${status.toUpperCase()} ${emoji}\n` +
         `Catatan: ${notes || '-'}\n\n` +
         `NB:\n` +
-        `- Amalsholih bapak/ibu bantu diingatkan lagi kepada putra/putrinya untuk membawa peralatan mengaji nya\n` +
-        `- Amalsholih bapak/ibu diberikan motivasi kepada putra/putrinya supaya semangat dalam mengajinya.\n\n` +
+        `- Amalsholih bapak/ibu bantu diingatkan kembali kepada putra/putrinya untuk membawa peralatan mengaji nya\n` +
+        `- Amalsholih bapak/ibu diberikan motivasi kepada putra/putrinya supaya semangat dalam mengajinya.\n` +
+        `- Amalsholih bapak/ibu supaya dibantu dalam meningkatkan bacaan maupun hafalan kepada putra/putrinya.\n\n` +
         `الحمد للّٰه جزاكم اللّٰه خيرًا 😇🙏🏻`;
+    return content;
 };
 
 export const formatAttendanceReport = (studentName: string, date: string, status: string, notes: string) => {

@@ -162,6 +162,7 @@ function SimplifiedFormClient({ formMeta, jenjangList, kelasList }: ClientProps)
                 email,
                 password,
                 options: {
+                    emailRedirectTo: `${window.location.origin}/`,
                     data: {
                         full_name: namaOrangTua,
                         role: 'orangtua'
